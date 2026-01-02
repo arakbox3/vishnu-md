@@ -1,10 +1,11 @@
-import {
-    default: makeWASocket,
-    useMultiFileAuthState,
-    DisconnectReason,
-    fetchLatestBaileysVersion,
-    makeCacheableSignalKeyStore
-} from "@whiskeysockets/baileys";
+import pkg from "@whiskeysockets/baileys";
+const { 
+    default: makeWASocket, 
+    useMultiFileAuthState, 
+    DisconnectReason, 
+    fetchLatestBaileysVersion 
+} = pkg;
+
 import pino from "pino";
 import fs from "fs";
 import path from "path";
