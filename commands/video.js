@@ -1,18 +1,22 @@
+
 import yts from "yt-search";
 import { exec } from "child_process";
 import fs from "fs";
 import path from "path";
 
-export default async (sock, msg, query) => {
+export default async (sock, msg, args) => {
   const chat = msg.key.remoteJid;
+  
+  // Array-യെ ഒരുമിച്ച് ചേർത്ത് String ആക്കുന്നു
+  const searchText = args.join(" ");
 
-  if (!query) {
+  if (!searchText) {
     return sock.sendMessage(chat, { text: "Usage: .video <name or link>" });
   }
 
   try {
     // 1. വീഡിയോ സെർച്ച് ചെയ്യുന്നു
-    const search = await yts(query);
+    const search = await yts(searchText);
     const video = search.videos[0];
 
     if (!video) {
@@ -48,7 +52,7 @@ export default async (sock, msg, query) => {
     // 3. വീഡിയോ ഡൗൺലോഡ് ചെയ്യുന്നു
     const fileName = `./media/video_${Date.now()}.mp4`;
     
-    // yt-dlp ഇൻസ്റ്റാൾ ചെയ്തിട്ടുണ്ടെന്ന് ഉറപ്പാക്കുക
+    // yt-dlp കമാൻഡ്
     exec(`yt-dlp -f "best[ext=mp4][height<=480]" "${videoUrl}" -o "${fileName}"`, async (error) => {
       if (error) {
         console.error("Download Error:", error);
@@ -58,15 +62,13 @@ export default async (sock, msg, query) => {
       // 4. വീഡിയോ അയക്കുന്നു
       if (fs.existsSync(fileName)) {
         await sock.sendMessage(chat, { 
-          video: { url: fileName }, // ഫയൽ പാത്ത് നേരിട്ട് നൽകുന്നു
+          video: fs.readFileSync(fileName), 
           mimetype: 'video/mp4',
           caption: `*${title}*`
         }, { quoted: msg });
 
         // അയച്ചു കഴിഞ്ഞാൽ ഫയൽ ഡിലീറ്റ് ചെയ്യുന്നു
-        setTimeout(() => {
-            if (fs.existsSync(fileName)) fs.unlinkSync(fileName);
-        }, 5000); 
+        fs.unlinkSync(fileName);
       }
     });
 
