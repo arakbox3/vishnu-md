@@ -1,10 +1,10 @@
 import fs from 'fs';
 
 export default async (sock, msg, args) => {
-  const chat = msg.key.remoteJid;
-  const searchQuery = args.join(" ");
-    const imagePath = './media/thumb.jpg'; 
-    const songPath = './media/song.ogg'; 
+const searchQuery = args.join(" ");
+const chat = msg.key.remoteJid;
+const imagePath = './media/thumb.jpg'; 
+const songPath = './media/song.ogg'; 
 
     const menuText = `*👺⃝⃘̉̉̉━━━━━━━━━◆◆◆◆◆*
 *┊ ┊ ┊ ┊ ┊*
@@ -16,7 +16,8 @@ export default async (sock, msg, args) => {
 ╔━━━━━━━━━━━━━❥❥❥
 ┃ *⊙  .Ping*
 ┃ *⊙  .Alive*
-┃ *⊙  .Menu* ┃ *⊙  .Song   <name>*
+┃ *⊙  .Menu*
+┃ *⊙  .Song   <name>*
 ┃ *⊙  .Video  <name>*
 ┃ *⊙  .sticker*
 ┃ *⊙  .Game*
@@ -30,17 +31,17 @@ export default async (sock, msg, args) => {
     try {
         // 1. Send Image
         if (fs.existsSync(imagePath)) {
-            await sock.sendMessage(from, { 
+            await sock.sendMessage(chat, { 
                 image: fs.readFileSync(imagePath), 
                 caption: menuText 
             }, { quoted: msg });
         } else {
-            await sock.sendMessage(from, { text: menuText }, { quoted: msg });
+            await sock.sendMessage(chat, { text: menuText }, { quoted: msg });
         }
 
         // 2. Send Audio (Voice Note)
         if (fs.existsSync(songPath)) {
-            await sock.sendMessage(from, { 
+            await sock.sendMessage(chat, { 
                 audio: fs.readFileSync(songPath), 
                 mimetype: 'audio/mp4', 
                 ptt: true 
