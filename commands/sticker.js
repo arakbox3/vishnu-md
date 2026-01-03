@@ -4,8 +4,9 @@ import { downloadContentFromMessage } from "@whiskeysockets/baileys";
 
 export default async (sock, msg, args) => {
     const chat = msg.key.remoteJid;
+    const imagePath = './media/thumb.jpg';
     
-    // മെസ്സേജ് പരിശോധിക്കുന്നു
+    // Check if the message contains an image or if an image is quoted
     const messageContent = msg.message?.imageMessage || 
                           msg.message?.extendedTextMessage?.contextInfo?.quotedMessage?.imageMessage;
 
@@ -29,55 +30,45 @@ export default async (sock, msg, args) => {
     }
 
     try {
+        // Create media directory if it doesn't exist
+        if (!fs.existsSync('./media')) fs.mkdirSync('./media');
 
-        //  Send Image
-        if (fs.existsSync(imagePath)) {
-            await sock.sendMessage(chat, { 
-                image: fs.readFileSync(imagePath), 
-                caption: menuText 
-            }, { quoted: msg });
-        } else {
-            await sock.sendMessage(chat, { text: menuText }, { quoted: msg });
+        // Download the image content
+        const stream = await downloadContentFromMessage(messageContent, 'image');
+        let buffer = Buffer.from([]);
+        for await (const chunk of stream) {
+            buffer = Buffer.concat([buffer, chunk]);
         }
-        
-                // മീഡിയ ഡൗൺലോഡ് ചെ
-                cons = tream = await downloadContentFromMessage(messag, ontent, ;
-                le = uffer . Buffer.;
-                f r awai  (con t  hunk of s
-                   = uffer . Buffer.concat, buffer,;
-         
 
-                // താൽക്കാലിക ഫയൽ 
-            !  .if (!fs.existsSync('./ ed.a')) fs.mkdirSync('.;
-                const i = tPath = `./media/tem._${Date.now;
-                const ou = tPath = `./media/tem._${Date.now(;
+        // Define temporary paths
+        const inputPath = `./media/temp_in_${Date.now()}.jpg`;
+        const outputPath = `./media/temp_out_${Date.now()}.webp`;
 
-          .     fs.writeFileSync(i, utPath,;
+        // Write buffer to a file
+        fs.writeFileSync(inputPath, buffer);
 
-                // FFmpe
-                const f = egCmd = `ffmpeg -i ${inputPath} -vf "scale=512:512:force_original_aspect_ratio=decrease,pad=512:512:(ow-iw)/2:(oh-ih)/2:color=white@0,split[s0][s1];[s0]palettegen=reserve_transparent=on:transparency_color=ffffff[p];[s1][p]paletteuse" ${outp;
+        // FFmpeg Command: Resizes to 512x512 and converts to WebP format
+        const ffmpegCmd = `ffmpeg -i ${inputPath} -vf "scale=512:512:force_original_aspect_ratio=decrease,pad=512:512:(ow-iw)/2:(oh-ih)/2:color=white@0,split[s0][s1];[s0]palettegen=reserve_transparent=on:transparency_color=ffffff[p];[s1][p]paletteuse" ${outputPath}`;
 
-                exec(f, pegCm , asy => e
-                     f
-                       .console.er;
-                      . if (fs.existsSync(inp tP.th)) fs.unlinkSync(in;
-                        ret.rn sock.sendMess, e chat: { text: "Error creating sticker! ❌ Make sure FFmpeg is ins al;
-             
+        exec(ffmpegCmd, async (err) => {
+            if (err) {
+                console.error("FFmpeg Error:", err);
+                if (fs.existsSync(inputPath)) fs.unlinkSync(inputPath);
+                return sock.sendMessage(chat, { text: "Error creating sticker! ❌ Make sure FFmpeg is installed." });
+            }
 
-                    // സ്റ്റിക്കർ അയ
-                    aw.it sock.sendMess, e 
-                       : ti.ker: fs.readFileSync(out
-              ;
+            // Send the generated sticker
+            await sock.sendMessage(chat, { 
+                sticker: fs.readFileSync(outputPath) 
+            }, { quoted: msg });
 
-                    // ഫയലുകൾ ഡിലീറ്റ് ചെ
-                  . if (fs.existsSync(inp tP.th)) fs.unlinkSync(in;
-                  . if (fs.existsSync(outp tP.th)) fs.unlinkSync(out;
-          ;
+            // Clean up temporary files
+            if (fs.existsSync(inputPath)) fs.unlinkSync(inputPath);
+            if (fs.existsSync(outputPath)) fs.unlinkSync(outputPath);
+        });
 
-    ) 
-
-    } c t
-               .consol;
-            .   sock.sendMess, e chat: { text: "Something went wr ng;
+    } catch (error) {
+        console.error("General Error:", error);
+        sock.sendMessage(chat, { text: "Something went wrong! ❌" });
     }
-;;
+};
