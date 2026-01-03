@@ -28,37 +28,32 @@ async function startAsura() {
         browser: ["Ubuntu", "Chrome", "20.0.04"]
     });
 
-    // Device Pairing Logic
     if (!sock.authState.creds.registered) {
-        const phoneNumber = await question('\nEnter your Phone Number (with Country Code, eg: 91xxxx): ');
+        const phoneNumber = await question('\nEnter your Phone Number (eg: 91xxxx): ');
         const code = await sock.requestPairingCode(phoneNumber.replace(/[^0-9]/g, ''));
-        console.log(`\n\x1b[32mYOUR PAIRING CODE: \x1b[1m${code}\x1b[0m\n`);
+        console.log(`\nYOUR PAIRING CODE: ${code}\n`);
     }
 
     sock.ev.on('creds.update', saveCreds);
 
-    // Connection Handler
     sock.ev.on('connection.update', async (update) => {
         const { connection, lastDisconnect } = update;
-        
         if (connection === 'close') {
             const shouldReconnect = lastDisconnect.error?.output?.statusCode !== DisconnectReason.loggedOut;
             if (shouldReconnect) startAsura();
         } else if (connection === 'open') {
             console.log('✅ Asura MD Connected Successfully!');
-            
-            // Send DM to owner on successful connection
-            const myNumber = "919048044745@s.whatsapp.net"; 
-            await sock.sendMessage(myNumber, { text: "*👺 Asura MD is Online!* \n\nCommand system is active. Try typing .ping" });
+            await sock.sendMessage("919048044745@s.whatsapp.net", { text: "*Asura MD Online!* Type .ping to test." });
         }
     });
 
-    // Message/Command Handler
+    // 100% Working Command Handler Section
     sock.ev.on('messages.upsert', async (chatUpdate) => {
         try {
             const msg = chatUpdate.messages[0];
             if (!msg.message || msg.key.fromMe) return;
 
+            // മെസ്സേജ് ബോഡി കൃത്യമായി എടുക്കുന്നു
             const body = msg.message.conversation || 
                          msg.message.extendedTextMessage?.text || 
                          msg.message.imageMessage?.caption || "";
@@ -69,24 +64,27 @@ async function startAsura() {
             const args = body.slice(prefix.length).trim().split(/ +/);
             const commandName = args.shift().toLowerCase();
 
-            // Resolve the path to the command file
+            // കമാൻഡ് ഫയലിലേക്കുള്ള കൃത്യമായ പാത്ത്
             const commandPath = path.join(process.cwd(), 'commands', `${commandName}.js`);
 
             if (fs.existsSync(commandPath)) {
-                // Import the command file dynamically
+                // Dynamic Import (ESM)
                 const commandModule = await import(pathToFileURL(commandPath).href);
-                const execute = commandModule.default;
-
-                if (typeof execute === 'function') {
-                    await execute(sock, msg, args);
+                
+                // ഫയലിനുള്ളിൽ 'export default' ഉണ്ടോ എന്ന് ചെക്ക് ചെയ്യുന്നു
+                const runCommand = commandModule.default;
+                
+                if (typeof runCommand === 'function') {
+                    await runCommand(sock, msg, args);
+                    console.log(`Executed: ${commandName}`);
                 } else {
-                    console.log(`❌ Error: ${commandName}.js does not have 'export default'`);
+                    console.log(`Error: ${commandName}.js is not exporting a function.`);
                 }
             } else {
-                console.log(`🔍 Command not found: ${commandName}`);
+                console.log(`File not found: ${commandPath}`);
             }
         } catch (err) {
-            console.error("Critical Command Error: ", err);
+            console.error("Command error:", err);
         }
     });
 }
