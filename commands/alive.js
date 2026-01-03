@@ -31,4 +31,4 @@ export default async (sock, msg, query) => {
         } else {
             await sock.sendMessage(from, { text: aliveMsg });
         }
-    
+};
