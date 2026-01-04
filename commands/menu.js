@@ -18,9 +18,11 @@ const songPath = './media/song.ogg';
 ┃ *⊙  .Menu*
 ┃ *⊙  .Song   <name>*
 ┃ *⊙  .Video  <name>*
-┃ *⊙  .sticker*
+┃ *⊙  .Sticker*
 ┃ *⊙  .Game*
-┃ *⊙  .image <query>* 
+┃ *⊙  .Owner*
+┃ *⊙  .Play <name>*
+┃ *⊙  .Image <name>* 
 ┃ °☆°☆°☆°☆°☆°☆°☆°☆°☆°☆°
 ╠━━━━━━━━━━━━━❥❥❥
 ┃ *owner* arun.Cumar 
@@ -51,4 +53,5 @@ const songPath = './media/song.ogg';
         console.error("Error in menu command:", error);
     }
 };
+
 
