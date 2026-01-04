@@ -37,6 +37,7 @@ export default async (sock, msg, args) => {
 ╠━━━━━━━━━━❥❥❥
 ┃ *owner* arun.Cumar 
 ╚━━━━⛥❖⛥━━━❥❥❥
+> *© ᴄʀᴇᴀᴛᴇᴅ ʙʏ 👺Asura MD*
 > 📢 Join our channel: https://whatsapp.com/channel/0029VbB59W9GehENxhoI5l24`;
 
         // ഇമേജ് ഉണ്ടെങ്കിൽ ഇമേജ് സഹിതം ടാഗ് അയക്കും
