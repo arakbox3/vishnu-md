@@ -92,7 +92,7 @@ export default async (sock, msg, args) => {
 
         // ✅ വോയിസ് നോട്ട് അയക്കുന്നു
         await sock.sendMessage(chat, { 
-          audio: audioBuffer, 
+          audio: voiceBuffer, 
           mimetype: "audio/ogg; codecs=opus",
           ptt: true ,
            contextInfo: {
