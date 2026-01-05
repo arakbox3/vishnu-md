@@ -12,14 +12,15 @@
     "@adiwajshing/keyed-db": "latest",
     "pino": "latest",
     "yt-search": "latest",
-    "axios": "^1.6.7",
-    "fs-extra": "^11.2.0",
+    "axios": "latest",
+    "fs-extra": "latest",
     "express": "latest",
-    "fluent-ffmpeg": "^2.1.2",
+    "fluent-ffmpeg": "latest",
     "ffmpeg-static": "latest", 
     "jimp": "latest",
     "node-fetch": "latest",
     "g-i-s": "latest",
+    "wa-sticker-formatter": "latest",
     "qrcode-terminal": "latest"
   }
 }
