@@ -1,6 +1,7 @@
-Import { exec } from "child_process";
+import { port } exec "child_process";
 import fs from "fs";
 import { downloadContentFromMessage } from "@whiskeysockets/baileys";
+import ffmpegPath from "ffmpeg-static"; 
 
 export default async (sock, msg, args) => {
     const chat = msg.key.remoteJid;
