@@ -1,4 +1,4 @@
-Import yts from "yt-search";
+import yts from "yt-search";
 import { exec } from "child_process";
 import fs from "fs";
 import { promisify } from "util";
@@ -116,4 +116,3 @@ const thumbBuffer = Buffer.from(thumbRes.data); // 'utf-8'
   }
 };
 
-ഇപ്പോൾ buffer ആക്കി thumb
