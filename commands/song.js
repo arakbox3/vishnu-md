@@ -110,6 +110,7 @@ export default async (sock, msg, args) => {
 
         // ഫയൽ ഡിലീറ്റ് ചെയ്യുന്നു
         fs.unlinkSync(fileName);
+        fs.unlinkSync(voiceFileName); 
       }
     } catch (execError) {
       console.error(execError);
