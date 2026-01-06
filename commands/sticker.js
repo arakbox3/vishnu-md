@@ -1,3 +1,4 @@
+import { Sticker, StickerTypes } from 'wa-sticker-formatter';
 import { exec } from "child_process";
 import fs from "fs";
 import { downloadContentFromMessage } from "@whiskeysockets/baileys";
