@@ -22,7 +22,6 @@
     "g-i-s": "latest",
     "ytdl-core": "latest",  
     "wa-sticker-formatter": "latest",
-    "@fshangala/fancy-text": "latest",
     "qrcode-terminal": "latest"
   }
 }
