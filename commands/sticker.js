@@ -1,4 +1,4 @@
-import { Sticker, StickerTypes } from 'fancy-sticker-generator'; // മെച്ചപ്പെട്ട ലൈബ്രറി
+import { Sticker, StickerTypes } from 'wa-sticker-formatter';
 import fs from "fs";
 import { downloadContentFromMessage } from "@whiskeysockets/baileys";
 
@@ -7,13 +7,10 @@ export default async (sock, msg, args) => {
     const imagePath = './media/thumb.jpg';
     const songPath = './media/song.opus';
 
-    // ഫോട്ടോ, വീഡിയോ, ജിഫ് എന്നിവ ചെക്ക് ചെയ്യുന്നു
-    const message = msg.message?.imageMessage || 
-                    msg.message?.videoMessage || 
-                    msg.message?.extendedTextMessage?.contextInfo?.quotedMessage?.imageMessage || 
-                    msg.message?.extendedTextMessage?.contextInfo?.quotedMessage?.videoMessage;
-
-    const type = msg.message?.imageMessage || msg.message?.extendedTextMessage?.contextInfo?.quotedMessage?.imageMessage ? 'image' : 'video';
+    // ക്വോട്ട് ചെയ്ത മെസ്സേജോ നേരിട്ടുള്ള മെസ്സേജോ എന്ന് നോക്കുന്നു
+    const quoted = msg.message?.extendedTextMessage?.contextInfo?.quotedMessage;
+    const message = msg.message?.imageMessage || msg.message?.videoMessage || 
+                    quoted?.imageMessage || quoted?.videoMessage;
 
     try {
         if (!message) {
@@ -33,27 +30,32 @@ export default async (sock, msg, args) => {
 > 📢 Join: https://whatsapp.com/channel/0029VbB59W9GehENxhoI5l24`;
 
             if (fs.existsSync(imagePath)) {
-                return sock.sendMessage(chat, { image: fs.readFileSync(imagePath), caption: helpMsg });
+                return sock.sendMessage(chat, { image: { url: imagePath }, caption: helpMsg });
             } else {
                 return sock.sendMessage(chat, { text: helpMsg });
             }
         }
 
+        // മീഡിയ ടൈപ്പ് കണ്ടെത്തുന്നു
+        const mediaType = message.url ? (msg.message?.imageMessage || quoted?.imageMessage ? 'image' : 'video') : null;
+
+        if (!mediaType) return sock.sendMessage(chat, { text: "❌ മീഡിയ കണ്ടെത്താൻ കഴിഞ്ഞില്ല!" });
+
         // മീഡിയ ഡൗൺലോഡ് ചെയ്യുന്നു
-        const stream = await downloadContentFromMessage(message, type);
+        const stream = await downloadContentFromMessage(message, mediaType);
         let buffer = Buffer.from([]);
         for await (const chunk of stream) {
             buffer = Buffer.concat([buffer, chunk]);
         }
 
-        // സ്റ്റിക്കർ ഫോർമാറ്റ് ചെയ്യുന്നു
+        // സ്റ്റിക്കർ നിർമ്മാണം (wa-sticker-formatter ഉപയോഗിച്ച്)
         const sticker = new Sticker(buffer, {
-            pack: 'Asura MD 👺', // സ്റ്റിക്കർ പാക്ക് പേര്
-            author: 'Arun Cumar', // സ്റ്റിക്കർ ഓതർ
-            type: StickerTypes.FULL, // സ്റ്റിക്കർ സൈസ്
+            pack: 'Asura MD 👺', 
+            author: 'Arun Cumar', 
+            type: StickerTypes.FULL, 
             categories: ['🤩', '🎉'],
             id: '12345',
-            quality: 70, // ക്വാളിറ്റി
+            quality: 70, 
         });
 
         const stickerBuffer = await sticker.toBuffer();
@@ -61,7 +63,7 @@ export default async (sock, msg, args) => {
         // സ്റ്റിക്കർ അയക്കുന്നു
         await sock.sendMessage(chat, { sticker: stickerBuffer }, { quoted: msg });
 
-        // കൂടെ നിങ്ങളുടെ പാട്ട് വരണമെന്നുണ്ടെങ്കിൽ താഴെ വരികൾ ഉപയോഗിക്കാം
+        // പാട്ട് അയക്കുന്നു
         if (fs.existsSync(songPath)) {
             await sock.sendMessage(chat, { 
                 audio: { url: songPath }, 
@@ -72,6 +74,7 @@ export default async (sock, msg, args) => {
 
     } catch (error) {
         console.error("Sticker Error:", error);
-        sock.sendMessage(chat, { text: "Not Found! ❌" });
+        sock.sendMessage(chat, { text: "❌ Error!" });
     }
 };
+
