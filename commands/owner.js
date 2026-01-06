@@ -18,6 +18,7 @@ export default async (sock, msg, args) => {
 ╠━━━━━━━━━━━━━❥❥❥
 ┃ *👑Creator:-* arun•°Cumar
 ╚━━━━━━━⛥❖⛥━━━━━━❥❥❥
+> *© ᴄʀᴇᴀᴛᴇᴅ ʙʏ 👺Asura MD*
 > 📢 Join: https://whatsapp.com/channel/0029VbB59W9GehENxhoI5l24`;
 
     const vcard = 'BEGIN:VCARD\n' +
