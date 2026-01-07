@@ -1,14 +1,35 @@
 import fs from 'fs';
 
 export default async (sock, msg, args) => {
-const chat = msg.key.remoteJid;
-        try {
-        // 1. റിയാക്ഷൻ നൽകുന്നു
-        await sock.sendMessage(chat, { react: { text: "✅", key: msg.key } });
-const imagePath = './media/thumb.jpg'; 
-const songPath = './media/song.opus'; 
+    const chat = msg.key.remoteJid;
 
-    const menuText = `*👺⃝⃘̉̉̉━━━━━━━━━◆◆◆◆◆*
+    try {
+        // 1. റിയാക്ഷൻ നൽകുന്നു
+        await sock.sendMessage(chat, { react: { text: "⏳", key: msg.key } });
+
+        // 2. ആനിമേഷൻ (Safe Interval 1.2s)
+        const { key } = await sock.sendMessage(chat, { text: "👺 Asura MD Loading..." });
+
+        const frames = [
+            "▰▱▱▱▱▱▱▱▱▱ 10%",
+            "▰▰▰▰▱▱▱▱▱▱ 40%",
+            "▰▰▰▰▰▰▰▱▱▱ 70%",
+            "▰▰▰▰▰▰▰▰▰▰ 100%",
+            "🚀 Asura MD Engine Ready!",
+            "✅ Sending Menu Now!"
+        ];
+
+        for (let frame of frames) {
+            await new Promise(resolve => setTimeout(resolve, 1200)); 
+            await sock.sendMessage(chat, { text: frame, edit: key });
+        }
+
+        await sock.sendMessage(chat, { react: { text: "✅", key: msg.key } });
+
+        const imagePath = './media/thumb.jpg'; 
+        const songPath = './media/song.opus'; 
+
+        const menuText = `*👺⃝⃘̉̉̉━━━━━━━━━◆◆◆◆◆*
 *┊ ┊ ┊ ┊ ┊*
 *┊ ┊ ✫ ˚㋛ ⋆｡ ❀*
 *┊ ☪︎⋆*
@@ -28,15 +49,14 @@ const songPath = './media/song.opus';
 ┃ *⊙  .Owner*
 ┃ *⊙  .Play <name>*
 ┃ *⊙  .Tagall*
-┃ *⊙  .Image <name>* 
-┃ °☆°☆°☆°☆°☆°☆°☆°☆°☆°☆°
+┃ *⊙  .Image <name>* ┃ °☆°☆°☆°☆°☆°☆°☆°☆°☆°☆°
 ╠━━━━━━━━━━━━━❥❥❥
 ┃ *owner* arun.Cumar 
 ╚━━━━━━━⛥❖⛥━━━━━━❥❥❥
-> *© ᴄʀᴇᴀᴛᴇᴅ ʙʏ 👺Asura MD* > 📢 Join our channel: https://whatsapp.com/channel/0029VbB59W9GehENxhoI5l24`;
+> *© ᴄʀᴇᴀᴛᴇᴅ ʙʏ 👺Asura MD*
+> 📢 Join our channel: https://whatsapp.com/channel/0029VbB59W9GehENxhoI5l24`;
 
-    try {
-        // 1. Send Image with Menu Text
+        // 3. Send Image with Menu Text
         if (fs.existsSync(imagePath)) {
             await sock.sendMessage(chat, {
                 image: fs.readFileSync(imagePath),
@@ -46,10 +66,8 @@ const songPath = './media/song.opus';
             await sock.sendMessage(chat, { text: menuText }, { quoted: msg });
         }
 
-        // 2. Send Opus Audio (As Voice Note with Context Info)
+        // 4. Send Opus Audio (As Voice Note with Context Info)
         if (fs.existsSync(songPath)) {
-            const audioBuffer = fs.readFileSync(songPath);
-
             await sock.sendMessage(chat, {
                 audio: { url: songPath },
                 mimetype: "audio/ogg; codecs=opus",
@@ -64,10 +82,8 @@ const songPath = './media/song.opus';
                     }
                 }
             }, { quoted: msg });
-        } else {
-            console.log("Menu audio file not found!");
         }
-        
+
     } catch (error) {
         console.error("Error in menu command:", error);
     }
