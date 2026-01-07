@@ -1,5 +1,8 @@
 import yts from "yt-search";
 import axios from "axios";
+import ffmpeg from "fluent-ffmpeg";
+import { PassThrough } from "stream";
+
 
 export default async (sock, msg, args) => {
   const chat = msg.key.remoteJid;
@@ -95,9 +98,17 @@ export default async (sock, msg, args) => {
     }, { quoted: msg });
 
     // ✅ വോയിസ് നോട്ട് അയക്കുന്നു
+    const audioStream = new PassThrough();
+
+    ffmpeg(audioUrl)
+      .toFormat('ogg')
+      .audioCodec('libopus')
+      .on('error', (err) => console.log('FFmpeg Error:', err))
+      .pipe(audioStream);
+
     await sock.sendMessage(chat, {
-      audio: { url: audioUrl },
-      mimetype: "audio/mp4",
+      audio: { stream: audioStream },
+      mimetype: 'audio/ogg; codecs=opus',
       ptt: true,
       contextInfo: {
         externalAdReply: {
