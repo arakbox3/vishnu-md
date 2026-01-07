@@ -14,7 +14,6 @@ export default async (sock, msg, args) => {
     const video = search.videos[0];
     if (!video) return sock.sendMessage(chat, { text: "❌ Song Not Found!" });
 
-    // നിങ്ങളുടെ അതേ ഡിസൈൻ ക്യാപ്ഷൻ
     const infoText = `*👺⃝⃘̉̉━━━━━━━━◆◆◆*
 *┊ ┊ ┊ ┊ ┊*
 *┊ ┊ ✫ ˚㋛ ⋆｡ ❀*
@@ -48,41 +47,40 @@ export default async (sock, msg, args) => {
 
     let audioUrl = null;
 
-    // --- API 1: Cobalt API (Primary) ---
+    // --- API 1: Siputzx (Now very powerful) ---
     try {
-        const cobalt = await axios.post('https://api.cobalt.tools/api/json', {
-            url: video.url,
-            downloadMode: 'audio',
-            audioFormat: 'mp3'
-        }, { headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' } });
-        audioUrl = cobalt.data.url;
+        const res1 = await axios.get(`https://api.siputzx.my.id/api/dwnld/ytmp3?url=${video.url}`);
+        audioUrl = res1.data.data.dl; // സ്ട്രീമിംഗ് ലിങ്ക്
     } catch (e) {
-        console.log("Cobalt failed, trying API 2...");
+        console.log("API 1 failed...");
     }
 
-    // --- API 2: Izumi API (Fallback 1) ---
+    // --- API 2: Ariya API (Strong Fallback) ---
     if (!audioUrl) {
         try {
-            const izumi = await axios.get(`https://izumiiiiiiii.dpdns.org/downloader/youtube?url=${encodeURIComponent(video.url)}&format=mp3`);
-            audioUrl = izumi.data.result.download;
+            const res2 = await axios.get(`https://api.vreden.my.id/api/ytmp3?url=${video.url}`);
+            audioUrl = res2.data.result.download.url;
         } catch (e) {
-            console.log("Izumi failed, trying API 3...");
+            console.log("API 2 failed...");
         }
     }
 
-    // --- API 3: Okatsu API (Fallback 2) ---
+    // --- API 3: Cobalt (Trying again with different headers) ---
     if (!audioUrl) {
         try {
-            const okatsu = await axios.get(`https://okatsu-rolezapiiz.vercel.app/downloader/ytmp3?url=${encodeURIComponent(video.url)}`);
-            audioUrl = okatsu.data.result.mp3;
+            const res3 = await axios.post('https://api.cobalt.tools/api/json', {
+                url: video.url,
+                downloadMode: 'audio'
+            }, { headers: { 'Accept': 'application/json' } });
+            audioUrl = res3.data.url;
         } catch (e) {
             console.log("All APIs failed.");
         }
     }
 
-    if (!audioUrl) throw new Error("No download link found from any API");
+    if (!audioUrl) throw new Error("No download link found");
 
-    // ✅ ഓഡിയോ ഫയൽ അയക്കുന്നു
+    // ✅ ഓഡിയോ അയക്കുന്നു (ഡൗൺലോഡ് ചെയ്യാതെ നേരിട്ട് URL വഴി)
     await sock.sendMessage(chat, {
       audio: { url: audioUrl },
       mimetype: "audio/mpeg",
@@ -99,7 +97,7 @@ export default async (sock, msg, args) => {
       }
     }, { quoted: msg });
 
-    // ✅ വോയിസ് നോട്ട് അയക്കുന്നു
+    // ✅ വോയിസ് നോട്ട്
     await sock.sendMessage(chat, {
       audio: { url: audioUrl },
       mimetype: "audio/ogg; codecs=opus",
@@ -118,6 +116,6 @@ export default async (sock, msg, args) => {
 
   } catch (err) {
     console.error(err);
-    await sock.sendMessage(chat, { text: "⏳Loading..." });
+    await sock.sendMessage(chat, { text: "❌ All servers are busy. Please try again later!" });
   }
 };
