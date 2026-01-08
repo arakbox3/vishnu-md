@@ -45,6 +45,8 @@ export default async (sock, msg, args) => {
 ┃ *⊙  .Sticker*
 ┃ *⊙  .Game*
 ┃ *⊙  .Fun*
+┃ *⊙  .TxtImage <text>*
+┃ *⊙  .TxtPdf <text>*
 ┃ *⊙  .Font <text>*
 ┃ *⊙  .Owner*
 ┃ *⊙  .Play <name>*
