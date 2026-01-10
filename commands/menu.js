@@ -51,6 +51,7 @@ export default async (sock, msg, args) => {
 ┃ *⊙  .Play <name>*
 ┃ *⊙  .Tagall*
 ┃ *⊙  .Image <name>* 
+┃ *⊙  .Help* 
 ┃ °☆°☆°☆°☆°☆°☆°☆°☆°☆°☆°
 ╠━━━━━━━━━━━━━❥❥❥
 ┃ *owner* arun.Cumar 
