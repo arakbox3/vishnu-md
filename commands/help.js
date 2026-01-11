@@ -5,9 +5,9 @@ export default async (sock, msg, args) => {
 
     try {
         // 1. റിയാക്ഷൻ നൽകുന്നു
-        await sock.sendMessage(chat, { react: { text: "🤙", key: msg.key } });
+        await sock.sendMessage(chat, { react: { text: "⏰", key: msg.key } });
 
-        // 2. ആനിമേഷൻ (Safe Interval 1.2s)
+        // 2. ആനിമേഷൻ (Safe Interval 1.3s)
         const { key } = await sock.sendMessage(chat, { text: "👺 Asura MD Loading..." });
 
         const frames = [
@@ -15,8 +15,7 @@ export default async (sock, msg, args) => {
             "🚀 ▰▰▰▰▱▱▱▱▱▱ 🔸️40%",
             "🚀 ▰▰▰▰▰▰▰▱▱▱ 🔸️70%",
             "🚀 ▰▰▰▰▰▰▰▰▰▰ 🔸️100%",
-            "🚀 Asura MD Engine Ready!",
-            "*👺 ASURA MD*"
+            "👺 Asura MD Engine Ready!",
         ];
 
         for (let frame of frames) {
@@ -39,59 +38,29 @@ export default async (sock, msg, args) => {
 ╔━━━━━━━━━━❥❥❥
 ┃ °☆°☆°☆°☆°☆°☆°☆°☆°
 ╠━━━━⛥❖⛥━━━❥❥❥
-┃ ⊙⚡   .Ping  
-┃ ⊙🔋   .Alive
-┃ ⊙📜   .Menu
-┃ ⊙🎵   .Song <name>
-┃ ⊙🎬  .Video <name>
-┃ ⊙🖼️  .Sticker
-┃ ⊙🎮  .Game
-┃ ⊙🎭  .Fun
-┃ ⊙🤖  .Ai <text>
-┃ ⊙🆎️  .Font <text>
-┃ ⊙👤  .Owner
-┃ ⊙📓  .Help
-┃ ⊙🎧  .Play <name>
-┃ ⊙📢  .Tagall
-┃ ⊙📷  .Image <name>
+┃ ⊙📡.Ping–Check bot speed.
+┃ ⊙🔋.Alive–Check if bot is online.
+┃ ⊙📜 .Menu–See all commands.
+┃ ⊙🎵 .Song <name>–save audio/MP3.
+┃ ⊙🎬 .Video <name>–save video/MP4.
+┃ ⊙🖼️ .Sticker–Turn image/video/gif into a sticker.
+┃ ⊙🎮 .Game–Play built-in games.
+┃ ⊙🎭 .Fun–Jokes and fun activities.
+┃ ⊙🤖 .Ai <text>–Chat with the AI.
+┃ ⊙🆎️ .Font <text>–Change text to stylish fonts.
+┃ ⊙👤 .Owner–Get creator's info.
+┃ ⊙📓 .Help–Get usage support.
+┃ ⊙🎧 .Play <name> <name>–Search and play music.
+┃ ⊙📢 .Tagall–Mention all group members.
+┃ ⊙📷 .Image <name>–Search and save photos
 ╚━━━⛥❖⛥━━━❥❥❥
 ┃ °☆°☆°☆°☆°☆°☆°☆°☆°
+╠━━━━⛥❖⛥━━━❥❥❥
+┃ *💡 How to Use 👺 Asura MD:*
+┃⦿ *Prefix:* [ . ] (Dot)
+┃⦿ *Usage:* Prefix + Command
+┃⦿ *Example:* `.alive` | `.ping`
 ╚━━━━⛥❖⛥━━━❥❥❥
-*💡 How to Use 👺 Asura MD:*
-⦿ *Prefix:* [ . ] (Dot)
-⦿ *Usage:* Prefix + Command
-⦿ *Example:* `.alive` | `.ping`
-
-`​.Ping – Check bot speed.`
-
-`​.Alive – Check if bot is online.`
-
-`​.Menu – See all commands.`
-
-`​.Song <name> – Download audio/MP3.`
-
-`​.Video <name> – Download video/MP4.`
-
-`​.Sticker – Turn image/video into a sticker.`
-
-`​.Game – Play built-in games.`
-
-`​.Fun – Jokes and fun activities.`
-
-`​.Ai <text> – Chat with the AI.`
-
-`​.Font <text> – Change text to stylish fonts`.
-
-`​.Owner – Get creator's info.`
-
-`​.Help – Get usage support.`
-
- `.Play <name> – Search and play music.`
-
-`.Tagall – Mention all group members.`
-
-​ `.Image <name> – Search and download photos`
-
 > *Select a command from the list above and type it with a dot.*
 
 © 👺 𝐴𝑠𝑢𝑟𝑎 𝑀𝐷 ᴍɪɴɪ ʙᴏᴛ
@@ -130,3 +99,5 @@ export default async (sock, msg, args) => {
         console.error("Error in Help command:", error);
     }
 };
+
+
