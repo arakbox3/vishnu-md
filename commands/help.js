@@ -28,7 +28,7 @@ export default async (sock, msg, args) => {
         const imagePath = './media/thumb.jpg'; 
         const songPath = './media/song.opus'; 
 
-        const menuText = `*👺⃝⃘̉̉̉━━━━━━━━━◆◆◆◆◆*
+        const helpText = `*👺⃝⃘̉̉̉━━━━━━━━━◆◆◆◆◆*
 *┊ ┊ ┊ ┊ ┊*
 *┊ ┊ ✫ ˚㋛ ⋆｡ ❀*
 *┊ ☪︎⋆*
@@ -59,7 +59,7 @@ export default async (sock, msg, args) => {
 ┃ *💡 How to Use 👺 Asura MD:*
 ┃⦿ *Prefix:* [ . ] (Dot)
 ┃⦿ *Usage:* Prefix + Command
-┃⦿ *Example:* `.alive` | `.ping`
+┃⦿ *Example: .alive | .ping*
 ╚━━━━⛥❖⛥━━━❥❥❥
 
 > *✅Select a command from the list above and type it with a dot.*
@@ -72,7 +72,7 @@ export default async (sock, msg, args) => {
         if (fs.existsSync(imagePath)) {
             await sock.sendMessage(chat, {
                 image: { url: imagePath },
-                caption: menuText
+                caption: helpText
             }, { quoted: msg });
         } else {
             await sock.sendMessage(chat, { text: helpText }, { quoted: msg });
