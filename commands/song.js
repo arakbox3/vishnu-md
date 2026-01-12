@@ -46,35 +46,32 @@ export default async (sock, msg, args) => {
     const thumbRes = await axios.get(video.thumbnail, { responseType: 'arraybuffer' });
     const thumbBuffer = Buffer.from(thumbRes.data);
 
-    let finalAudioUrl = null;
+    let audioUrl = null;
 
-    // --- API FALLBACK SYSTEM ---
-    
-    // 1. Cobalt API
-    try {
-        const res = await axios.post('https://api.cobalt.tools/api/json', 
-        { url: video.url, downloadMode: 'audio', audioFormat: 'mp3' },
-        { headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' } });
-        finalAudioUrl = res.data.url;
-    } catch (e) { console.log("Cobalt Failed"); }
-
-    // 2. Siputzx API
-    if (!finalAudioUrl) {
-        try {
+    // --- API ലെയറുകൾ (MP3) ---
+    const audioApis = [
+        async () => { // API 1: Cobalt
+            const res = await axios.post('https://api.cobalt.tools/api/json', { url: video.url, downloadMode: 'audio' }, { headers: { 'Accept': 'application/json' } });
+            return res.data.url;
+        },
+        async () => { // API 2: Siputzx
             const res = await axios.get(`https://api.siputzx.my.id/api/d/ytmp3?url=${encodeURIComponent(video.url)}`);
-            finalAudioUrl = res.data.data.dl;
-        } catch (e) { console.log("Siputzx Failed"); }
-    }
+            return res.data.data.dl;
+        },
+        async () => { // API 3: AlyaChan
+            const res = await axios.get(`https://api.alyachan.dev/api/yta?url=${encodeURIComponent(video.url)}&apikey=Gatabu-Bot`);
+            return res.data.data.download.url;
+        }
+    ];
 
-    // 3. Alyachan API
-    if (!finalAudioUrl) {
+    for (const getAUrl of audioApis) {
         try {
-            const res = await axios.get(`https://api.alyachan.dev/api/ytmp3?url=${encodeURIComponent(video.url)}&apikey=Gatabu-Bot`);
-            finalAudioUrl = res.data.data.download.url;
-        } catch (e) { console.log("Alyachan Failed"); }
+            audioUrl = await getAUrl();
+            if (audioUrl) break;
+        } catch (e) { console.log("Audio API Layer Failed, switching..."); }
     }
 
-    if (!finalAudioUrl) throw new Error("All APIs failed");
+    if (!audioUrl) throw new Error("All Audio APIs failed");
 
     // ✅ ഓഡിയോ 
     await sock.sendMessage(chat, {
