@@ -1,25 +1,31 @@
-import { Client } from "soundcloud-scraper";
-import ffmpeg from "fluent-ffmpeg";
-import { PassThrough } from "stream";
 import axios from "axios";
-
-const scClient = new Client();
+import fs from "fs";
 
 export default async (sock, msg, args) => {
   const chat = msg.key.remoteJid;
   const searchQuery = args.join(" ");
+  const thumbPath = "./media/thumb.jpg"; // നിങ്ങളുടെ ലോക്കൽ ഇമേജ് പാത്ത്
 
   if (!searchQuery) {
     return sock.sendMessage(chat, { text: "❌ Usage: *.song* [song name]" });
   }
 
   try {
-    // 1. SoundCloud സെർച്ച്
-    const searchResults = await scClient.search(searchQuery, "track");
-    if (!searchResults.length) return sock.sendMessage(chat, { text: "❌ Song Not Found!" });
+    // 1. Spotify Search (ഇത് മിക്കവാറും എല്ലാ പാട്ടുകളും കണ്ടെത്തും)
+    const searchRes = await axios.get(`https://api.siputzx.my.id/api/s/spotify?query=${encodeURIComponent(searchQuery)}`);
+    
+    if (!searchRes.data || !searchRes.data.data.length) {
+      return sock.sendMessage(chat, { text: "❌ Song Not Found!" });
+    }
 
-    const track = searchResults[0];
-    const songInfo = await scClient.getSongInfo(track.url);
+    const track = searchRes.data.data[0];
+    const trackUrl = track.url;
+
+    // 2. നേരിട്ടുള്ള ഡൗൺലോഡ് ലിങ്ക് എടുക്കുന്നു (No Proxy, No API Key)
+    const dlRes = await axios.get(`https://api.siputzx.my.id/api/d/spotify?url=${encodeURIComponent(trackUrl)}`);
+    const finalAudioUrl = dlRes.data.data.download;
+
+    if (!finalAudioUrl) throw new Error("Stream link failed");
 
     // നിങ്ങളുടെ പഴയ അതേ ഡിസൈൻ ക്യാപ്ഷൻ
     const infoText = `*👺⃝⃘̉̉━━━━━━━━◆◆◆*
@@ -30,61 +36,34 @@ export default async (sock, msg, args) => {
 *✧* 「 \`👺Asura MD\` 」
 *╰───────────❂*
 ╭•°•❲ *Streaming...* ❳•°•
- ⊙🎬 *TITLE:* ${songInfo.title}
- ⊙📺 *ARTIST:* ${songInfo.author.name}
- ⊙⏳ *DURATION:* ${Math.floor(songInfo.duration / 60000)} mins
+ ⊙🎬 *TITLE:* ${track.title}
+ ⊙📺 *ARTIST:* ${track.artist.name}
+ ⊙⏳ *DURATION:* ${track.duration}
 *◀︎ •၊၊||၊||||။‌၊||••*
 ╰╌╌╌╌╌╌╌╌╌╌࿐
-╔━━━━━━━━━━━❥❥❥
-┃ *Audio 🔊*
-╔━━━━━━━━━━━
-┃ *Voice 🎤*
-╚━━━━⛥❖⛥━━━━❥❥❥
 > 📢 Join our channel: https://whatsapp.com/channel/0029VbB59W9GehENxhoI5l24
 > *© ᴄʀᴇᴀᴛᴇ BY 👺Asura MD*`;
 
-    // തംബ്നെയിൽ അയക്കുന്നു
+    // ഇമേജ് അയക്കുന്നു
     await sock.sendMessage(chat, {
-      image: { url: songInfo.thumbnail },
+      image: fs.existsSync(thumbPath) ? fs.readFileSync(thumbPath) : { url: track.thumbnail },
       caption: infoText
     });
 
-    // തംബ്നെയിൽ ബഫർ (External Ad Reply-ക്കായി)
-    const thumbRes = await axios.get(songInfo.thumbnail, { responseType: 'arraybuffer' });
-    const thumbBuffer = Buffer.from(thumbRes.data);
-
-    // 2. നേരിട്ടുള്ള സ്ട്രീമിംഗ് ലിങ്ക്
-    const stream = await songInfo.downloadProgressive();
-
-    // ✅ ഓഡിയോ സ്ട്രീം അയക്കുന്നു
+    // ഓഡിയോ നേരിട്ട് സ്ട്രീം ചെയ്യുന്നു (No Download to Server)
     await sock.sendMessage(chat, {
-      audio: { stream: stream },
+      audio: { url: finalAudioUrl },
       mimetype: "audio/mpeg",
-      fileName: `${songInfo.title}.mp3`,
+      fileName: `${track.title}.mp3`,
       contextInfo: {
         externalAdReply: {
-          title: songInfo.title,
-          body: 'Asura MD 👺 | SoundCloud',
-          thumbnail: thumbBuffer,
+          title: track.title,
+          body: 'Asura MD 👺',
+          thumbnailUrl: track.thumbnail,
           mediaType: 1,
-          sourceUrl: songInfo.url,
           renderLargerThumbnail: true,
         }
       }
-    }, { quoted: msg });
-
-    // ✅ വോയിസ് സ്ട്രീം അയക്കുന്നു
-    const voiceStreamSource = await songInfo.downloadProgressive();
-    const voiceStream = new PassThrough();
-    ffmpeg(voiceStreamSource)
-      .toFormat('ogg')
-      .audioCodec('libopus')
-      .pipe(voiceStream);
-
-    await sock.sendMessage(chat, {
-      audio: { stream: voiceStream },
-      mimetype: 'audio/ogg; codecs=opus',
-      ptt: true
     }, { quoted: msg });
 
   } catch (err) {
