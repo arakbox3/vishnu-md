@@ -12,7 +12,6 @@
     "@adiwajshing/keyed-db": "latest",
     "pino": "latest",
     "soundcloud-scraper": "latest",
-    "yt-dlp-exec": "latest",
     "axios": "latest",
     "fs-extra": "latest",
     "express": "latest",
