@@ -3,67 +3,66 @@ import fs from "fs";
 export default async (sock, msg, args) => {
   const chat = msg.key.remoteJid;
   const sender = msg.pushName || "User";
-  
-  // Path to your local image
   const imagePath = "./media/thumb.jpg"; 
 
-  // Design Header
-  const header = `*👺⃝⃘̉̉━━━━━━━━◆◆◆*
+  // --- Game Logic (Randomized Math Puzzle) ---
+  const val1 = Math.floor(Math.random() * 10) + 2; // 2 to 11
+  const val2 = Math.floor(Math.random() * 5) + 1;  // 1 to 6
+  const val3 = Math.floor(Math.random() * 5) + 2;  // 2 to 7
+
+  // Puzzle Structure:
+  // 👺 + 👺 = X
+  // 👺 + 🔥 = Y
+  // 🔥 - 💎 = Z
+  // 👺 + 🔥 + 💎 = ?
+  
+  const line1 = val1 + val1;
+  const line2 = val1 + val2;
+  const line3 = val2 - val3;
+  const finalAnswer = val1 + val2 + val3;
+
+  // --- Design Caption ---
+  const infoText = `*👺⃝⃘̉̉━━━━━━━━◆◆◆*
 *┊ ┊ ┊ ┊ ┊*
 *┊ ┊ ✫ ˚㋛ ⋆｡ ❀*
 *┊ ☪︎⋆*
-*⊹* 🎰 *Asura MD Slot Machine*
+*⊹* 🧩 *Asura MD IQ Challenge*
 *✧* 「 \`👺Asura MD\` 」
-*╰───────────❂*`;
-
-  // First message - The "Spinning" state
-  const loadingText = `${header}
-╭•°•❲ *Spinning...* ❳•°•
+*╰───────────❂*
+╭•°•❲ *Game Started!* ❳•°•
  ⊙👤 *PLAYER:* ${sender}
- ⊙🎰 *STATUS:* [ 🔄 | 🔄 | 🔄 ]
-*🎮*
+ ⊙🎮 *QUEST:* Solve the Emoji Puzzle!
+*◀︎ •၊၊||၊||||။‌၊||••*
 ╰╌╌╌╌╌╌╌╌╌╌࿐
-> 🎰 Betting on your luck...`;
 
-  // Send initial image with caption
-  const sentMsg = await sock.sendMessage(chat, { 
-    image: fs.existsSync(imagePath) ? fs.readFileSync(imagePath) : { url: 'https://placehold.co/600x400?text=No+Image' },
-    caption: loadingText 
-  });
+*CAN YOU SOLVE THIS?*
+1️⃣ 👺 + 👺 = ${line1}
+2️⃣ 👺 + 🔥 = ${line2}
+3️⃣ 🔥 - 💎 = ${line3}
 
-  // Game Logic
-  const items = ["🍎", "💎", "🎰", "👺", "🔥", "⭐"];
-  const c1 = items[Math.floor(Math.random() * items.length)];
-  const c2 = items[Math.floor(Math.random() * items.length)];
-  const c3 = items[Math.floor(Math.random() * items.length)];
+*FIND THE VALUE OF:*
+✨ *👺 + 🔥 + 💎 = ?* ✨
 
-  let resultMessage = "";
-  if (c1 === c2 && c2 === c3) {
-    resultMessage = "🎊 JACKPOT! YOU WON! 🎊";
-  } else if (c1 === c2 || c1 === c3 || c2 === c3) {
-    resultMessage = "✨ BIG WIN! ✨";
-  } else {
-    resultMessage = "💀 YOU LOST! TRY AGAIN.";
-  }
+*How to play:*
+Think carefully and reply with the correct answer!
 
-  // Final Design after spin
-  const finalText = `${header}
-╭•°•❲ *Spin Result* ❳•°•
- ⊙👤 *PLAYER:* ${sender}
- ⊙🎰 *SLOTS:* [ ${c1} | ${c2} | ${c3} ]
-*🎮*
-╰╌╌╌╌╌╌╌╌╌╌࿐
 ╔━━━━━━━━━━━❥❥❥
-┃ *${resultMessage}*
+┃ *Check your IQ! 🧠*
 ╚━━━━⛥❖⛥━━━━❥❥❥
 > 📢 Join our channel: https://whatsapp.com/channel/0029VbB59W9GehENxhoI5l24
 > *© ᴄʀᴇᴀᴛᴇ BY 👺Asura MD*`;
 
-  // Delay for 2 seconds then EDIT the message
-  setTimeout(async () => {
-    await sock.sendMessage(chat, {
-      text: finalText,
-      edit: sentMsg.key
-    });
-  }, 2000);
+  // --- Send Message ---
+  try {
+    await sock.sendMessage(chat, { 
+      image: fs.existsSync(imagePath) ? fs.readFileSync(imagePath) : { url: 'https://placehold.co/600x400?text=Asura+MD' },
+      caption: infoText 
+    }, { quoted: msg });
+
+    // Console-ൽ ഉത്തരം കാണാൻ (For Admin)
+    console.log(`Game started in ${chat}. Answer: ${finalAnswer}`);
+
+  } catch (err) {
+    console.error(err);
+  }
 };
