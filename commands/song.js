@@ -48,20 +48,56 @@ export default async (sock, msg, args) => {
     const thumbRes = await axios.get(video.thumbnail, { responseType: 'arraybuffer' });
     const thumbBuffer = Buffer.from(thumbRes.data);
 
-    let audioUrl = null;
+let downloadUrl = null;
 
-    // --- API 1: YtApi ---
+// --- API 1: Cobalt API (MP3 / Best Quality) ---
+try {
+    const res1 = await axios.post(
+        'https://api.cobalt.tools/api/json',
+        {
+            url: video.url,
+            downloadMode: 'audio',
+            audioFormat: 'mp3',
+            audioQuality: '320'
+        },
+        {
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        }
+    );
+    downloadUrl = res1.data.url;
+} catch (e) {
+    console.log("Cobalt MP3 API Failed");
+}
+
+// --- API 2: Siputzx MP3 API (Stable) ---
+if (!downloadUrl) {
     try {
-        audioUrl = `https://ytapi-0n47.onrender.com/download?format=mp3&url=${encodeURIComponent(video.url)}`;
-        
-        // checking
-        await axios.head(audioUrl); 
+        const res2 = await axios.get(
+            `https://api.siputzx.my.id/api/d/ytmp3?url=${encodeURIComponent(video.url)}`
+        );
+        downloadUrl = res2.data.data.dl;
     } catch (e) {
-        console.log("API 1 Failed", e.message);
-        audioUrl = null;
+        console.log("Siputzx MP3 API Failed");
     }
+}
 
-    if (!audioUrl) throw new Error("All APIs failed");
+// --- API 3: Decypher / AlyaChan MP3 API (Backup) ---
+if (!downloadUrl) {
+    try {
+        const res3 = await axios.get(
+            `https://api.alyachan.dev/api/ytmp3?url=${encodeURIComponent(video.url)}&apikey=Gatabu-Bot`
+        );
+        downloadUrl = res3.data.data.download.url;
+    } catch (e) {
+        console.log("Decypher MP3 API Failed");
+    }
+}
+
+// --- Final Check ---
+if (!downloadUrl) throw new Error("MP3 download failed");
 
     // ✅ ഓഡിയോ അയക്കുന്നു
     await sock.sendMessage(chat, {
