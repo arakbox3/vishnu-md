@@ -59,46 +59,30 @@ export default async (sock, msg, args) => {
 > 📢 Join our channel: https://whatsapp.com/channel/0029VbB59W9GehENxhoI5l24
 > *© ᴄʀᴇᴀᴛᴇᴅ ʙʏ 👺Asura MD*`;
 
-        // ഫോട്ടോയും ഡിസൈനും അയക്കുന്നു
         await sock.sendMessage(chat, { 
             image: { url: video.thumbnail }, 
             caption: captionText 
         }, { quoted: msg });
 
-        // 2. വീഡിയോ ഡാറ്റ എടുക്കുന്നു (Izumi -> Okatsu -> Cobalt എന്ന ക്രമത്തിൽ)
-        let downloadUrl = null;
-
-        try {
-            // ഒന്നാമത്തെ വഴി: YtApi
-            const res = await tryRequest(() => axios.get(`https://ytapi-0n47.onrender.com/download?format=mp4&url=${encodeURIComponent(videoUrl)}`, AXIOS_DEFAULTS));
-            downloadUrl = res.data.result.download;
-        } catch (e1) {
-            try {
-                // രണ്ടാമത്തെ വഴി: Okatsu
-                const res = await tryRequest(() => axios.get(`https://okatsu-rolezapiiz.vercel.app/downloader/ytmp4?url=${encodeURIComponent(video.url)}`, AXIOS_DEFAULTS));
-                downloadUrl = res.data.result.mp4;
-            } catch (e2) {
-                // മൂന്നാമത്തെ വഴി: Cobalt (ഏറ്റവും പവർഫുൾ)
-                const res = await axios.post('https://api.cobalt.tools/api/json', {
-                    url: video.url,
-                    videoQuality: '360'
-                }, AXIOS_DEFAULTS);
-                downloadUrl = res.data.url;
-            }
-        }
-
-        if (!downloadUrl) throw new Error("All APIs failed");
+      
+        // format=mp4 Api
+        let downloadUrl = `https://ytapi-0n47.onrender.com/download?format=mp4&url=${encodeURIComponent(video.url)}`;
 
         // 3. വീഡിയോ അയക്കുന്നു
         await sock.sendMessage(chat, {
             video: { url: downloadUrl },
             mimetype: 'video/mp4',
             fileName: `${video.title}.mp4`,
-            caption: `*${video.title}*`
+            caption: `*🎬 ${video.title}*\n\n*👺Asura MD*`,
+            contextInfo: {
+                matchingText: video.title,
+                forwardingScore: 999,
+                isForwarded: true,
+            }
         }, { quoted: msg });
 
     } catch (err) {
-        console.error("Main Error:", err);
-        await sock.sendMessage(chat, { text: "⏳loading" });
+        console.error("Video Download Error:", err);
+        await sock.sendMessage(chat, { text: "❌ All servers are busy or file too large. Please try again later!" });
     }
 };
