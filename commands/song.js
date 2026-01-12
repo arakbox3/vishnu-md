@@ -61,7 +61,7 @@ export default async (sock, msg, args) => {
     // --- API 2: Keith API ---
     if (!audioUrl) {
         try {
-            const res2 = await axios.get(`https://apis-keith.vercel.app/download/dlmp3?url=${encodeURIComponent(video.url)}`);
+            const res2 = await axios.get(`https://izumiiiiiiii.dpdns.org/downloader/youtube?url=${encodeURIComponent(youtubeUrl)}&format=mp3`);
             audioUrl = res2.data.result.downloadUrl;
         } catch (e) {
             console.log("API 2 Failed");
