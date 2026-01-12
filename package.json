@@ -11,7 +11,7 @@
     "@whiskeysockets/baileys": "latest",
     "@adiwajshing/keyed-db": "latest",
     "pino": "latest",
-    "yt-search": "latest",
+    "soundcloud-scraper": "latest",
     "yt-dlp-exec": "latest",
     "axios": "latest",
     "fs-extra": "latest",
