@@ -19,22 +19,44 @@ export default async (sock, msg, args) => {
         const video = videos[0];
         const videoUrl = video.url;
 
-        // 2. Fetch Direct Audio Stream URL (No Local Download)
-        // ytmp3 എൻഡ് പോയിന്റ് ഉപയോഗിച്ച് നേരിട്ട് ഓഡിയോ ലിങ്ക് എടുക്കുന്നു
-        const dlRes = await axios.get(`https://api.siputzx.my.id/api/d/ytmp3?url=${encodeURIComponent(videoUrl)}`);
-        
-        if (!dlRes.data || !dlRes.data.data || !dlRes.data.data.dl) {
-            throw new Error('Audio source not available');
+        // 2. 5 Powerful API List
+        const apiList = [
+            `https://api.siputzx.my.id/api/d/ytmp3?url=${videoUrl}`,
+            `https://api.zenkey.my.id/api/download/ytmp3?url=${videoUrl}`,
+            `https://widipe.com/download/ytdl?url=${videoUrl}`,
+            `https://api.agatz.xyz/api/ytmp3?url=${videoUrl}`,
+            `https://api.boxi.my.id/api/youtube/mp3?url=${videoUrl}`
+        ];
+
+        let finalAudioUrl = null;
+        let success = false;
+
+        // 3. Fallback Logic: ഒന്നൊന്നായി ചെക്ക് ചെയ്യുന്നു
+        for (const api of apiList) {
+            try {
+                const res = await axios.get(api);
+                // API റെസ്പോൺസ് അനുസരിച്ച് ലിങ്ക് എടുക്കുന്നു
+                finalAudioUrl = res.data?.data?.dl || res.data?.result?.url || res.data?.result?.download || res.data?.url || res.data?.mp3;
+                
+                if (finalAudioUrl) {
+                    success = true;
+                    break; 
+                }
+            } catch (e) {
+                continue; // എറർ വന്നാൽ അടുത്ത API നോക്കും
+            }
         }
 
-        const finalAudioUrl = dlRes.data.data.dl;
+        if (!success || !finalAudioUrl) {
+            throw new Error('All music APIs are down.');
+        }
 
-        // 3. Asura MD Design for Music
+        // 4. Asura MD Design
         const infoText = `*👺⃝⃘̉̉━━━━━━━━◆◆◆*
 *┊ ┊ ┊ ┊ ┊*
 *┊ ┊ ✫ ˚㋛ ⋆｡ ❀*
 *┊ ☪︎⋆*
-*⊹*    *🎵Song Download*
+*⊹*  *🎵 Song Download*
 *✧* 「 \`👺Asura MD\` 」
 *╰───────────❂*
 ╭•°•❲ *Streaming...* ❳•°•
@@ -43,16 +65,15 @@ export default async (sock, msg, args) => {
  ⊙⏳ *DURATION:* ${video.timestamp}
 *◀︎ •၊၊||၊||||။‌၊||••*
 ╰╌╌╌╌╌╌╌╌╌╌࿐
-> 📢 Join our channel: https://whatsapp.com/channel/0029VbB59W9GehENxhoI5l24
 > *© ᴄʀᴇᴀᴛᴇ BY 👺Asura MD*`;
 
-        // 4. Send Thumbnail first (Optional, but looks better)
+        // 5. Send Thumbnail first
         await sock.sendMessage(chatId, { 
             image: { url: video.thumbnail }, 
             caption: infoText 
         }, { quoted: msg });
 
-        // 5. Send Audio Directly 
+        // 6. Send Audio Directly (No Local Download)
         await sock.sendMessage(chatId, {
             audio: { url: finalAudioUrl },
             mimetype: 'audio/mpeg',
@@ -72,6 +93,6 @@ export default async (sock, msg, args) => {
 
     } catch (error) {
         console.error('[MUSIC ERROR]:', error);
-        await sock.sendMessage(chatId, { text: '❌ Connection failed. Please try again later.' }, { quoted: msg });
+        await sock.sendMessage(chatId, { text: '❌ Failed to stream audio. Please try again later.' }, { quoted: msg });
     }
 };
