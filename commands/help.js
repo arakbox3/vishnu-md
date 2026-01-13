@@ -53,7 +53,7 @@ export default async (sock, msg, args) => {
 ┃ ⊙🤯 .Play–built-in games.
 ┃ ⊙👁️ .view–View once media retriever
 ┃ ⊙📢 .Tagall–Mention all group members.
-┃ ⊙🙏 .Welcome On/Off--Welcome All members.
+┃ ⊙🙏 .Welcome On/Off--Welcome all new members.
 ┃ ⊙📷 .Image <name>–Search and save photos
 ╚━━━⛥❖⛥━━━❥❥❥
 ┃ °☆°☆°☆°☆°☆°☆°☆°☆°
