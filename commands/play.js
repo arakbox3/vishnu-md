@@ -3,65 +3,84 @@ import fs from "fs";
 export default async (sock, msg, args) => {
   const chat = msg.key.remoteJid;
   const sender = msg.pushName || "User";
-  const imagePath = "./media/thumb.jpg"; 
+  const thumbPath = "./media/thumb.jpg";
 
-  // --- Game Logic (Randomized Math Puzzle) ---
-  const val1 = Math.floor(Math.random() * 10) + 2; // 2 to 11
-  const val2 = Math.floor(Math.random() * 5) + 1;  // 1 to 6
-  const val3 = Math.floor(Math.random() * 5) + 2;  // 2 to 7
+  // 10 Levels of Emojis
+  const gameLevels = [
+    { items: ["📦", "🎁", "🏺", "💎", "💰", "🌋"], name: "Ancient Ruins" },
+    { items: ["🚗", "🚲", "🚜", "🚛", "🚁", "🚀"], name: "Vehicle Yard" },
+    { items: ["🦁", "🐯", "🐼", "🐨", "🦊", "🐸"], name: "Wild Jungle" },
+    { items: ["🍎", "🍉", "🍇", "🍓", "🍍", "🥭"], name: "Fruit Garden" },
+    { items: ["🌑", "🌕", "⭐", "🪐", "☀️", "☄️"], name: "Deep Space" },
+    { items: ["🍔", "🍕", "🍟", "🍩", "🍦", "🍣"], name: "Food Court" },
+    { items: ["⚽", "🏀", "🎾", "🏐", "🎱", "🏏"], name: "Sports Club" },
+    { items: ["🎸", "🎺", "🎻", "🥁", "🎹", "🎷"], name: "Music Hall" },
+    { items: ["🏠", "🏰", "🏢", "⛩️", "🛖", "⛪"], name: "Old City" },
+    { items: ["👺", "👻", "💀", "👽", "🤖", "🎃"], name: "Asura Realm" }
+  ];
 
-  // Puzzle Structure:
-  // 👺 + 👺 = X
-  // 👺 + 🔥 = Y
-  // 🔥 - 💎 = Z
-  // 👺 + 🔥 + 💎 = ?
+  // Pick a random level
+  const levelIndex = Math.floor(Math.random() * gameLevels.length);
+  const currentLevel = gameLevels[levelIndex];
   
-  const line1 = val1 + val1;
-  const line2 = val1 + val2;
-  const line3 = val2 - val3;
-  const finalAnswer = val1 + val2 + val3;
+  // Pick winning emoji and its position (1-6)
+  const winningIndex = Math.floor(Math.random() * 6);
+  const winningEmoji = currentLevel.items[winningIndex];
+  const winningNumber = winningIndex + 1;
 
-  // --- Design Caption ---
-  const infoText = `*👺⃝⃘̉̉━━━━━━━━◆◆◆*
+  // Header Design
+  const header = `*👺⃝⃘̉̉━━━━━━━━◆◆◆*
 *┊ ┊ ┊ ┊ ┊*
 *┊ ┊ ✫ ˚㋛ ⋆｡ ❀*
 *┊ ☪︎⋆*
-*⊹* 🧩 *Asura MD IQ Challenge*
+*⊹* 🏴‍☠️ *Asura Treasure Hunt*
 *✧* 「 \`👺Asura MD\` 」
-*╰───────────❂*
-╭•°•❲ *Game Started!* ❳•°•
- ⊙👤 *PLAYER:* ${sender}
- ⊙🎮 *QUEST:* Solve the Emoji Puzzle!
-╰╌╌╌╌╌╌╌╌╌╌࿐
+*╰───────────❂*`;
 
-*CAN YOU SOLVE THIS?*
-1️⃣ 👺 + 👺 = ${line1}
-2️⃣ 👺 + 🔥 = ${line2}
-3️⃣ 🔥 - 💎 = ${line3}
+  // Game UI
+  let menuText = `${header}\n`;
+  menuText += `╭•°•❲ *LEVEL: ${levelIndex + 1}* ❳•°•\n`;
+  menuText += ` ⊙👤 *PLAYER:* ${sender}\n`;
+  menuText += ` ⊙🏰 *AREA:* ${currentLevel.name}\n`;
+  menuText += `╰╌╌╌╌╌╌╌╌╌╌࿐\n\n`;
+  menuText += `*FIND THE HIDDEN TREASURE:* \n\n`;
 
-*FIND THE VALUE OF:*
-✨ *👺 + 🔥 + 💎 = ?* ✨
+  currentLevel.items.forEach((emoji, i) => {
+    menuText += `${i + 1}. [ ${emoji} ] Hidden Slot\n`;
+  });
 
-*How to play:*
-Think carefully and reply with the correct answer!
+  menuText += `\n*How to play:* \nReply to this message with a number *(1-6)* to claim your prize!\n\n`;
+  menuText += `> *© ᴄʀᴇᴀᴛᴇ BY 👺Asura MD*`;
 
-╔━━━━━━━━━━━❥❥❥
-┃ *Check your IQ! 🧠*
-╚━━━━⛥❖⛥━━━━❥❥❥
-> 📢 Join our channel: https://whatsapp.com/channel/0029VbB59W9GehENxhoI5l24
-> *© ᴄʀᴇᴀᴛᴇ BY 👺Asura MD*`;
+  // Send the Game Message
+  const sentMsg = await sock.sendMessage(chat, {
+    image: fs.existsSync(thumbPath) ? fs.readFileSync(thumbPath) : { url: 'https://i.imgur.com/your-image.jpg' },
+    caption: menuText
+  }, { quoted: msg });
 
-  // --- Send Message ---
-  try {
-    await sock.sendMessage(chat, { 
-      image: fs.existsSync(imagePath) ? fs.readFileSync(imagePath) : { url: 'https://placehold.co/600x400?text=Asura+MD' },
-      caption: infoText 
-    }, { quoted: msg });
+  // --- REPLY HANDLER (Works inside the same code) ---
+  sock.ev.on('messages.upsert', async (chatUpdate) => {
+    const m = chatUpdate.messages[0];
+    if (!m.message) return;
 
-    // Console-ൽ ഉത്തരം കാണാൻ (For Admin)
-    console.log(`Game started in ${chat}. Answer: ${finalAnswer}`);
+    // Check if it's a reply to the game message
+    const isReplyToGame = m.message.extendedTextMessage?.contextInfo?.stanzaId === sentMsg.key.id;
+    const userChoice = m.message.conversation || m.message.extendedTextMessage?.text;
 
-  } catch (err) {
-    console.error(err);
-  }
+    if (isReplyToGame && userChoice) {
+      const chosenNum = parseInt(userChoice.trim());
+
+      if (chosenNum >= 1 && chosenNum <= 6) {
+        if (chosenNum === winningNumber) {
+          await sock.sendMessage(chat, { 
+            text: `*🎊 CONGRATULATIONS ${sender.toUpperCase()}! 🎊*\n\nYou found the treasure ${winningEmoji} at Slot ${winningNumber}!\n\n*Level ${levelIndex + 1} Cleared!* ✅` 
+          }, { quoted: m });
+        } else {
+          await sock.sendMessage(chat, { 
+            text: `*💀 OOPS! YOU LOST...*\n\nThe treasure was hidden in Slot ${winningNumber} ${winningEmoji}.\nBetter luck next time!` 
+          }, { quoted: m });
+        }
+      }
+    }
+  });
 };
