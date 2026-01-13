@@ -43,6 +43,7 @@ export default async (sock, msg, args) => {
 ┃ ⊙📜 .Menu–See all commands.
 ┃ ⊙🎵 .Song <name>–save audio/MP3.
 ┃ ⊙🎬 .Video <name>–save video/MP4.
+┃ ⊙🔊 .Audio <name>–save audio/MP3.
 ┃ ⊙🖼️ .Sticker–Turn image/video/gif into a sticker.
 ┃ ⊙🎲 .Game–Play built-in games.
 ┃ ⊙🎭 .Fun–Jokes and fun activities.
