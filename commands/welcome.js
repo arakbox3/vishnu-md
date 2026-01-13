@@ -1,20 +1,55 @@
 import fs from 'fs';
 
+let welcomeStatus = {}; 
+
 export default async (sock) => {
-    // ഗ്രൂപ്പിൽ മാറ്റങ്ങൾ വരുമ്പോൾ ഇത് പ്രവർത്തിക്കും
+
+    // 1. കമാൻഡ് ഹാൻഡ്ലർ (Welcome On/Off ചെയ്യാൻ)
+    sock.ev.on('messages.upsert', async (chatUpdate) => {
+        try {
+            const msg = chatUpdate.messages[0];
+            if (!msg.message || msg.key.fromMe) return;
+
+            const chat = msg.key.remoteJid;
+            const text = msg.message.conversation || msg.message.extendedTextMessage?.text || "";
+
+            if (text.toLowerCase() === '.welcome on') {
+                welcomeStatus[chat] = true;
+                await sock.sendMessage(chat, { text: "*🔛*" }, { quoted: msg });
+            } else if (text.toLowerCase() === '.welcome off') {
+                welcomeStatus[chat] = false;
+                await sock.sendMessage(chat, { text: "❌ *Asura MD Welcome System Deactivated!*" }, { quoted: msg });
+            }
+        } catch (e) {
+            console.log("Command Error: ", e);
+        }
+    });
+
+    // 2. വെൽക്കം ഹാൻഡ്ലർ (DP സഹിതം)
     sock.ev.on('group-participants.update', async (anu) => {
         try {
-            // ആരെങ്കിലും ഗ്രൂപ്പിൽ ജോയിൻ ചെയ്താൽ മാത്രം (Action: add)
+            const chat = anu.id;
+            
+            // ചെക്ക്: ഈ ഗ്രൂപ്പിൽ വെൽക്കം ഓൺ ആണോ എന്ന് നോക്കുന്നു
+            if (!welcomeStatus[chat]) return;
+
             if (anu.action === 'add') {
-                const chat = anu.id;
                 const metadata = await sock.groupMetadata(chat);
                 const thumbPath = "./media/thumb.jpg";
 
                 for (let jid of anu.participants) {
-                    // പുതിയ മെമ്പറുടെ പേരും ഗ്രൂപ്പ് വിവരങ്ങളും
                     const userName = jid.split('@')[0];
                     const groupName = metadata.subject;
                     const groupDesc = metadata.desc || "Welcome to our group!";
+
+                    
+                    let ppUrl;
+                    try {
+                        ppUrl = await sock.profilePictureUrl(jid, 'image');
+                    } catch {
+                        
+                        ppUrl = fs.existsSync(thumbPath) ? fs.readFileSync(thumbPath) : 'https://i.imgur.com/your-image.jpg';
+                    }
 
                     const welcomeText = `*👺⃝⃘̉̉━━━━━━━━◆◆◆*
 *┊ ┊ ┊ ┊ ┊*
@@ -32,9 +67,9 @@ ${groupDesc}
 
 > *© ᴄʀᴇᴀᴛᴇ BY 👺Asura MD*`;
 
-                    // വെൽക്കം മെസ്സേജ് അയക്കുന്നു
+                
                     await sock.sendMessage(chat, {
-                        image: fs.existsSync(thumbPath) ? fs.readFileSync(thumbPath) : { url: 'https://i.imgur.com/your-image.jpg' },
+                        image: typeof ppUrl === 'string' ? { url: ppUrl } : ppUrl,
                         caption: welcomeText,
                         mentions: [jid]
                     });
