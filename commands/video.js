@@ -4,59 +4,76 @@ import yts from 'yt-search';
 export default async (sock, msg, args) => {
     const chatId = msg.key.remoteJid;
     const searchQuery = args.join(" ");
-    const thumbPath = "./media/thumb.jpg";
 
     if (!searchQuery) {
-        return sock.sendMessage(chatId, { text: '❌ What video do you want to download?' }, { quoted: msg });
+        return sock.sendMessage(chatId, { text: '❌ Please provide a name or YouTube link!' }, { quoted: msg });
     }
 
     try {
         // 1. YouTube Search
         const { videos } = await yts(searchQuery);
-        if (!videos || videos.length === 0) {
-            return sock.sendMessage(chatId, { text: '❌ No videos found!' }, { quoted: msg });
-        }
-
+        if (!videos || videos.length === 0) return sock.sendMessage(chatId, { text: '❌ Video not found!' });
+        
         const video = videos[0];
         const videoUrl = video.url;
 
-        // 2. Fetch Direct Stream URL (No Local Download)
-        // Using a reliable public indexer to get mp4 link
-        const dlRes = await axios.get(`https://api.siputzx.my.id/api/d/ytmp4?url=${encodeURIComponent(videoUrl)}`);
-        
-        if (!dlRes.data || !dlRes.data.data || !dlRes.data.data.dl) {
-            throw new Error('Video source not available');
+        // 2. List of 5 Powerful APIs
+        const apiList = [
+            `https://api.siputzx.my.id/api/d/ytmp4?url=${videoUrl}`,
+            `https://api.zenkey.my.id/api/download/ytmp4?url=${videoUrl}`,
+            `https://widipe.com/download/ytdl?url=${videoUrl}`,
+            `https://api.boxi.my.id/api/youtube/mp4?url=${videoUrl}`,
+            `https://api.agatz.xyz/api/ytmp4?url=${videoUrl}`
+        ];
+
+        let downloadUrl = null;
+        let success = false;
+
+        // 3. Trying APIs one by one (Fallback System)
+        for (const api of apiList) {
+            try {
+                const res = await axios.get(api);
+                // ഓരോ API-യുടെയും റെസ്പോൺസ് സ്ട്രക്ചർ വ്യത്യസ്തമായിരിക്കും
+                downloadUrl = res.data?.data?.dl || res.data?.result?.url || res.data?.result?.download || res.data?.url;
+                
+                if (downloadUrl) {
+                    success = true;
+                    break; 
+                }
+            } catch (e) {
+                continue; // അടുത്ത API ട്രൈ ചെയ്യും
+            }
         }
 
-        const finalVideoUrl = dlRes.data.data.dl;
+        if (!success || !downloadUrl) {
+            throw new Error("All APIs are currently busy.");
+        }
 
-        // 3. Your Specific Asura Design
-        const infoText = `*👺⃝⃘̉̉━━━━━━━━◆◆◆*
+        // 4. Asura MD Design Caption
+        const caption = `*👺⃝⃘̉̉━━━━━━━━◆◆◆*
 *┊ ┊ ┊ ┊ ┊*
 *┊ ┊ ✫ ˚㋛ ⋆｡ ❀*
 *┊ ☪︎⋆*
-*⊹* 🎬 *Video Download*
+*⊹* 🎬 *Video Downloaded*
 *✧* 「 \`👺Asura MD\` 」
 *╰───────────❂*
-╭•°•❲ *Streaming...* ❳•°•
  ⊙🎬 *TITLE:* ${video.title}
- ⊙📺 *CHANNEL:* ${video.author.name}
  ⊙⏳ *DURATION:* ${video.timestamp}
+ ⊙🔗 *LINK:* ${videoUrl}
 *◀︎ •၊၊||၊||||။‌၊||••*
 ╰╌╌╌╌╌╌╌╌╌╌࿐
-> 📢 Join our channel: https://whatsapp.com/channel/0029VbB59W9GehENxhoI5l24
 > *© ᴄʀᴇᴀᴛᴇ BY 👺Asura MD*`;
 
-        // 4. Send Video Directly (No Local Storage Use)
+        // 5. Send Video (No local download, streaming via URL)
         await sock.sendMessage(chatId, {
-            video: { url: finalVideoUrl },
-            caption: infoText,
+            video: { url: downloadUrl },
+            caption: caption,
             mimetype: 'video/mp4',
             fileName: `${video.title}.mp4`
         }, { quoted: msg });
 
     } catch (error) {
-        console.error('[VIDEO ERROR]:', error);
-        await sock.sendMessage(chatId, { text: '❌ Download failed. The video might be too large or the server is busy.' }, { quoted: msg });
+        console.error(error);
+        await sock.sendMessage(chatId, { text: '❌ Failed to process video. Please try again later.' });
     }
 };
