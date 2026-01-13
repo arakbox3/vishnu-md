@@ -62,6 +62,7 @@ export default async (sock, msg, args) => {
  ⊙🔗 *LINK:* ${videoUrl}
 *◀︎ •၊၊||၊||||။‌၊||••*
 ╰╌╌╌╌╌╌╌╌╌╌࿐
+> 📢 Join our channel: https://whatsapp.com/channel/0029VbB59W9GehENxhoI5l24
 > *© ᴄʀᴇᴀᴛᴇ BY 👺Asura MD*`;
 
         // 5. Send Video (No local download, streaming via URL)
