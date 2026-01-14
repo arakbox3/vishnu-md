@@ -34,7 +34,6 @@ export default async (sock, msg, args) => {
 ╰╌╌╌╌╌╌╌╌╌╌࿐
 ╔━━━━━━━━━━━❥❥❥
 ┃ *Sending Audio 🔊*
-┃ *Sending Voice 🎤*
 ╚━━━━⛥❖⛥━━━━❥❥❥
 > 📢 Join our channel: https://whatsapp.com/channel/0029VbB59W9GehENxhoI5l24
 > *© ᴄʀᴇᴀᴛᴇ BY 👺Asura MD*`;
@@ -93,34 +92,6 @@ export default async (sock, msg, args) => {
       audio: audioBuffer,
       mimetype: "audio/mpeg",
       fileName: `${video.title}.mp3`,
-      contextInfo: {
-        externalAdReply: {
-          title: video.title,
-          body: 'Asura MD 👺',
-          thumbnail: thumbBuffer,
-          mediaType: 1,
-          sourceUrl: videoUrl,
-          renderLargerThumbnail: true,
-        }
-      }
-    }, { quoted: msg });
-    //  ✅ Voice Note (PTT) 
-    const voiceStream = new PassThrough();
-    ffmpeg(finalAudioUrl)
-      .vn() 
-      .audioCodec('libopus')
-      .audioChannels(1)
-      .audioFrequency(48000)
-      .toFormat('opus') 
-      .on('error', (err) => console.log('FFmpeg Voice Error:', err.message))
-      .pipe(voiceStream);
-
-    const voiceBuffer = await getBuffer(voiceStream);
-
-    await sock.sendMessage(chat, {
-      audio: voiceBuffer,
-      mimetype: 'audio/ogg; codecs=opus',
-      ptt: true,
       contextInfo: {
         externalAdReply: {
           title: video.title,
