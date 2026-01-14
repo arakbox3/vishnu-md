@@ -1,6 +1,9 @@
 import yts from "yt-search";
-import axios from "axios";
+import { exec } from "child_process";
 import fs from "fs";
+import { promisify } from "util";
+
+const execPromise = promisify(exec);
 
 export default async (sock, msg, args) => {
   const chat = msg.key.remoteJid;
@@ -11,7 +14,7 @@ export default async (sock, msg, args) => {
   }
 
   try {
-    // 1. യൂട്യൂബ് സെർച്ച്
+    // 1. YouTube Search
     const search = await yts(searchText);
     const video = search.videos[0];
 
@@ -21,9 +24,6 @@ export default async (sock, msg, args) => {
 
     const videoUrl = video.url;
     const title = video.title;
-    const channel = video.author.name;
-    const views = video.views;
-    const date = video.ago;
 
     const captionText = `*👺⃝⃘̉̉━━━━━━━━━━━◆◆◆*
 *┊ ┊ ┊ ┊ ┊*
@@ -34,60 +34,43 @@ export default async (sock, msg, args) => {
 *╰─────────────────❂*
 ╭•°•❲ *Downloading...* ❳•°•
  ⊙🎵 *TITLE:* ${title}
- ⊙📺 *CHANNEL:* ${channel}
- ⊙👀 *VIEWS:* ${views}
- ⊙⏳ *AGO:* ${date}
+ ⊙📺 *CHANNEL:* ${video.author.name}
+ ⊙👀 *VIEWS:* ${video.views}
+ ⊙⏳ *AGO:* ${video.ago}
 *◀︎ •၊၊||၊||||။‌‌‌‌၊||••*
 ╰╌╌╌╌╌╌╌╌╌╌╌╌࿐
 > 📢 Join our channel: https://whatsapp.com/channel/0029VbB59W9GehENxhoI5l24
 > *© ᴄʀᴇᴀᴛᴇᴅ ʙʏ 👺Asura MD*`;
 
-    // തംബ്‌നെയിൽ ലോഡ് ചെയ്യുന്നു
+    // 2. തംബ്‌നെയിൽ അയക്കുന്നു
     const thumbPath = "./media/thumb.jpg";
     const imageContent = fs.existsSync(thumbPath) ? fs.readFileSync(thumbPath) : { url: video.thumbnail };
     
-    await sock.sendMessage(chat, { 
-      image: imageContent, 
-      caption: captionText 
-    });
+    await sock.sendMessage(chat, { image: imageContent, caption: captionText });
 
-    // 2. API-ൽ നിന്ന് ലിങ്ക് എടുക്കുന്നു
-    let downloadUrl = null;
-    try {
-      const resYupra = await axios.get(`https://api.yupra.my.id/api/downloader/ytmp3?url=${encodeURIComponent(videoUrl)}`);
-      if (resYupra.data?.success) {
-        downloadUrl = resYupra.data.data.download_url;
-      } else {
-        const resOkatsu = await axios.get(`https://okatsu-rolezapiiz.vercel.app/downloader/ytmp3?url=${encodeURIComponent(videoUrl)}`);
-        downloadUrl = resOkatsu.data?.dl;
-      }
-    } catch (e) { 
-      console.error("API Error:", e.message); 
+    // 3. താൽക്കാലിക ഫയൽ സെറ്റ് ചെയ്യുന്നു
+    const tempFile = `./media/${Date.now()}.mp3`;
+
+    const command = `yt-dlp -f "bestaudio" --extract-audio --audio-format mp3 --audio-quality 128K "${videoUrl}" -o "${tempFile}"`;
+
+    await execPromise(command);
+
+    if (fs.existsSync(tempFile)) {
+      // 5. ഓഡിയോ ഫയൽ അയക്കുന്നു
+      await sock.sendMessage(chat, {
+        audio: fs.readFileSync(tempFile),
+        mimetype: 'audio/mpeg',
+        ptt: false 
+      }, { quoted: msg });
+
+      // 6. ഫയൽ ഡിലീറ്റ് ചെയ്യുന്നു (Storage ക്ലീൻ ആയിരിക്കും)
+      fs.unlinkSync(tempFile);
+    } else {
+      throw new Error("File not found after download");
     }
 
-    if (!downloadUrl) return sock.sendMessage(chat, { text: "Could not fetch download link! ❌" });
-
-    // 3. BUFFER STREAMING (ഫയൽ സേവ് ചെയ്യാതെ)
-    const response = await axios({
-      method: 'get',
-      url: downloadUrl,
-      responseType: 'arraybuffer',
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36' 
-      }
-    });
-
-    const audioBuffer = Buffer.from(response.data);
-
-    // 4. ഓഡിയോ അയക്കുന്നു
-    await sock.sendMessage(chat, {
-      audio: audioBuffer,
-      mimetype: 'audio/mp4', 
-      ptt: false 
-    }, { quoted: msg });
-
   } catch (err) {
-    console.error("Streaming Error:", err);
-    sock.sendMessage(chat, { text: "Something went wrong! 😢" });
+    console.error("Permanent Error:", err);
+    sock.sendMessage(chat, { text: "Error: ! ❌" });
   }
 };
