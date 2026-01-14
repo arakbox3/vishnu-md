@@ -14,7 +14,7 @@ export default async (sock, msg, args) => {
   try {
     const search = await yts(searchQuery);
     const video = search.videos[0];
-    if (!video) return sock.sendMessage(chat, { text: "❌ Song Not Found!" });
+    if (!video) return sock.sendMessage(chat, { text: "❌ audio Not Found!" });
 
     const videoUrl = video.url;
 
@@ -23,7 +23,7 @@ export default async (sock, msg, args) => {
 *┊ ┊ ┊ ┊ ┊*
 *┊ ┊ ✫ ˚㋛ ⋆｡ ❀*
 *┊ ☪︎⋆*
-*⊹* 🪔 *Song Download*
+*⊹* 🪔 *Audio Download*
 *✧* 「 \`👺Asura MD\` 」
 *╰───────────❂*
 ╭•°•❲ *Streaming...* ❳•°•
