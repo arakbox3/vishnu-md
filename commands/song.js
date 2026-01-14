@@ -1,83 +1,125 @@
 import yts from "yt-search";
 import axios from "axios";
+import ffmpeg from "fluent-ffmpeg";
+import { PassThrough } from "stream";
 import fs from "fs";
 
 export default async (sock, msg, args) => {
   const chat = msg.key.remoteJid;
-  const searchText = args.join(" ");
+  const searchQuery = args.join(" ");
 
-  if (!searchText) {
-    return sock.sendMessage(chat, { text: "Usage: .song <song name>" });
+  if (!searchQuery) {
+    return sock.sendMessage(chat, { text: "❌ Usage: *.song* [song name/link]" });
   }
 
   try {
-    // 1. യൂട്യൂബ് സെർച്ച്
-    const search = await yts(searchText);
+    const search = await yts(searchQuery);
     const video = search.videos[0];
+    if (!video) return sock.sendMessage(chat, { text: "❌ Song Not Found!" });
 
-    if (!video) {
-      return sock.sendMessage(chat, { text: "Song Not Found 😢" });
-    }
+    const videoUrl = video.url; // videoUrl ഡിഫൈൻ ചെയ്തു
 
-    const videoUrl = video.url;
-    const title = video.title;
-    const channel = video.author.name;
-    const views = video.views;
-    const date = video.ago;
-
-    const captionText = `*👺⃝⃘̉̉━━━━━━━━━━━◆◆◆*
+    // Design Caption
+    const infoText = `*👺⃝⃘̉̉━━━━━━━━◆◆◆*
 *┊ ┊ ┊ ┊ ┊*
 *┊ ┊ ✫ ˚㋛ ⋆｡ ❀*
 *┊ ☪︎⋆*
 *⊹* 🪔 *Song Download*
 *✧* 「 \`👺Asura MD\` 」
-*╰─────────────────❂*
+*╰───────────❂*
 ╭•°•❲ *Downloading...* ❳•°•
- ⊙🎵 *TITLE:* ${title}
- ⊙📺 *CHANNEL:* ${channel}
- ⊙👀 *VIEWS:* ${views}
- ⊙⏳ *AGO:* ${date}
+ ⊙🎬 *TITLE:* ${video.title}
+ ⊙📺 *CHANNEL:* ${video.author.name}
+ ⊙⏳ *DURATION:* ${video.timestamp}
 *◀︎ •၊၊||၊||||။‌‌‌‌၊||••*
-╰╌╌╌╌╌╌╌╌╌╌╌╌࿐
+╰╌╌╌╌╌╌╌╌╌╌࿐
+╔━━━━━━━━━━━❥❥❥
+┃ *Sending Audio 🔊*
+┃ *Sending Voice 🎤*
+╚━━━━⛥❖⛥━━━━❥❥❥
 > 📢 Join our channel: https://whatsapp.com/channel/0029VbB59W9GehENxhoI5l24
-> *© ᴄʀᴇᴀᴛᴇᴅ ʙʏ 👺Asura MD*`;
+> *© ᴄʀᴇᴀᴛᴇ BY 👺Asura MD*`;
 
-    // . തംബ്‌നെയിൽ അയക്കുന്നു (Local image path: ./media/thumb.jpg)
+    // 1. തംബ്‌നെയിൽ അയക്കുന്നു
     const thumbPath = "./media/thumb.jpg";
     const imageContent = fs.existsSync(thumbPath) ? fs.readFileSync(thumbPath) : { url: video.thumbnail };
-    await sock.sendMessage(chat, { image: imageContent, caption: captionText });
-
-    // --- STREAMING LOGIC (NO SAVE) ---
-    // yt-dlp ഉപയോഗിച്ച് ഡാറ്റ നേരിട്ട് സ്റ്റാൻഡേർഡ് ഔട്ട്‌പുട്ടിലേക്ക് (stdout) എടുക്കുന്നു
-    const ytProcess = spawn("yt-dlp", [
-      "-f", "bestaudio",
-      "--extract-audio",
-      "--audio-format", "mp3",
-      "--audio-quality", "128K",
-      "-o", "-", // ഡാറ്റ ഫയലിലേക്ക് മാറ്റാതെ നേരിട്ട് തരുന്നു
-      video.url
-    ]);
-
-    let chunks = [];
-    ytProcess.stdout.on("data", (chunk) => chunks.push(chunk));
-
-    ytProcess.on("close", async () => {
-      const audioBuffer = Buffer.concat(chunks);
-      
-      await sock.sendMessage(chat, {
-        audio: audioBuffer,
-        mimetype: 'audio/mpeg',
-        ptt: false 
-      }, { quoted: msg });
+    
+    await sock.sendMessage(chat, {
+      image: imageContent,
+      caption: infoText
     });
 
-    ytProcess.on("error", (err) => {
-      console.error("YT-DLP Error:", err);
-      sock.sendMessage(chat, { text: "Streaming failed! ❌" });
-    });
+    const thumbRes = await axios.get(video.thumbnail, { responseType: 'arraybuffer' });
+    const thumbBuffer = Buffer.from(thumbRes.data);
+
+    let finalAudioUrl = null;
+
+    // --- API ലെയറുകൾ (MP3) ---
+    const audioApis = [
+        async () => { 
+            const res = await axios.get(`https://api.yupra.my.id/api/downloader/ytmp3?url=${encodeURIComponent(videoUrl)}`);
+            return res.data.data.download_url; // API കീ കറക്റ്റ് ചെയ്തു
+        },
+        async () => { 
+            const res = await axios.get(`https://okatsu-rolezapiiz.vercel.app/downloader/ytmp3?url=${encodeURIComponent(videoUrl)}`);
+            return res.data.dl;
+        }
+    ];
+
+    for (const getAUrl of audioApis) {
+        try {
+            finalAudioUrl = await getAUrl();
+            if (finalAudioUrl) break;
+        } catch (e) { console.log("API Layer Failed, switching..."); }
+    }
+
+    if (!finalAudioUrl) throw new Error("All Audio APIs failed");
+
+    // ✅ ഓഡിയോ അയക്കുന്നു
+    await sock.sendMessage(chat, {
+      audio: { url: finalAudioUrl },
+      mimetype: "audio/mp4", // Play error ഒഴിവാക്കാൻ mp4/mpeg ഉപയോഗിക്കാം
+      fileName: `${video.title}.mp3`,
+      contextInfo: {
+        externalAdReply: {
+          title: video.title,
+          body: 'Asura MD 👺',
+          thumbnail: thumbBuffer,
+          mediaType: 1,
+          sourceUrl: videoUrl,
+          renderLargerThumbnail: true,
+        }
+      }
+    }, { quoted: msg });
+
+    // ✅ വോയിസ് അയക്കുന്നു (Converted using FFmpeg)
+    const voiceStream = new PassThrough();
+    ffmpeg(finalAudioUrl)
+      .audioFrequency(48000)
+      .audioChannels(1)
+      .toFormat('ogg')
+      .audioCodec('libopus')
+      .on('error', (err) => console.log('FFmpeg Error:', err.message))
+      .pipe(voiceStream);
+
+    await sock.sendMessage(chat, {
+      audio: { stream: voiceStream },
+      mimetype: 'audio/ogg; codecs=opus',
+      ptt: true,
+      contextInfo: {
+        externalAdReply: {
+          title: video.title,
+          body: 'Asura MD 👺',
+          thumbnail: thumbBuffer,
+          mediaType: 1,
+          sourceUrl: videoUrl,
+          renderLargerThumbnail: true,
+        }
+      }
+    }, { quoted: msg });
 
   } catch (err) {
-    console.error("Main Error:", err);
-    sock.sendMessage(chat, { text: "Something went wrong! 😢" });
+    console.error(err);
+    await sock.sendMessage(chat, { text: "❌ All servers are busy. Please try again later!" });
   }
 };
