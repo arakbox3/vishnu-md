@@ -42,51 +42,38 @@ export default async (sock, msg, args) => {
 > 📢 Join our channel: https://whatsapp.com/channel/0029VbB59W9GehENxhoI5l24
 > *© ᴄʀᴇᴀᴛᴇᴅ ʙʏ 👺Asura MD*`;
 
-    // 2. തംബ്‌നെയിൽ അയക്കുന്നു (Local image path: ./media/thumb.jpg)
+    // . തംബ്‌നെയിൽ അയക്കുന്നു (Local image path: ./media/thumb.jpg)
     const thumbPath = "./media/thumb.jpg";
     const imageContent = fs.existsSync(thumbPath) ? fs.readFileSync(thumbPath) : { url: video.thumbnail };
     await sock.sendMessage(chat, { image: imageContent, caption: captionText });
 
-    // 2. No download 
-    let downloadUrl = null;
-    try {
-      const resYupra = await axios.get(`https://api.yupra.my.id/api/downloader/ytmp3?url=${encodeURIComponent(videoUrl)}`);
-      if (resYupra.data?.success) {
-        downloadUrl = resYupra.data.data.download_url;
-      } else {
-        const resOkatsu = await axios.get(`https://okatsu-rolezapiiz.vercel.app/downloader/ytmp3?url=${encodeURIComponent(videoUrl)}`);
-        downloadUrl = resOkatsu.data?.dl;
-      }
-    } catch (e) { console.error("API Link Error"); }
+    // --- STREAMING LOGIC (NO SAVE) ---
+    // yt-dlp ഉപയോഗിച്ച് ഡാറ്റ നേരിട്ട് സ്റ്റാൻഡേർഡ് ഔട്ട്‌പുട്ടിലേക്ക് (stdout) എടുക്കുന്നു
+    const ytProcess = spawn("yt-dlp", [
+      "-f", "bestaudio",
+      "--extract-audio",
+      "--audio-format", "mp3",
+      "--audio-quality", "128K",
+      "-o", "-", // ഡാറ്റ ഫയലിലേക്ക് മാറ്റാതെ നേരിട്ട് തരുന്നു
+      video.url
+    ]);
 
-    if (!downloadUrl) return sock.sendMessage(chat, { text: " ❌" });
+    let chunks = [];
+    ytProcess.stdout.on("data", (chunk) => chunks.push(chunk));
 
-    // temporary download(Buffer Method)
-    const fileName = `./media/song_${Date.now()}.mp3`;
-    const response = await axios({
-      method: 'get',
-      url: downloadUrl,
-      responseType: 'stream'
-    });
-
-    const writer = fs.createWriteStream(fileName);
-    response.data.pipe(writer);
-
-    writer.on('finish', async () => {
- 
+    ytProcess.on("close", async () => {
+      const audioBuffer = Buffer.concat(chunks);
+      
       await sock.sendMessage(chat, {
-        audio: fs.readFileSync(fileName),
+        audio: audioBuffer,
         mimetype: 'audio/mpeg',
         ptt: false 
       }, { quoted: msg });
-
-      // 5. അയച്ച ശേഷം ഫയൽ ഡിലീറ്റ് ചെയ്യുന്നു
-      fs.unlinkSync(fileName);
     });
 
-    writer.on('error', (err) => {
-      console.error("Download Error:", err);
-      sock.sendMessage(chat, { text: " 😢" });
+    ytProcess.on("error", (err) => {
+      console.error("YT-DLP Error:", err);
+      sock.sendMessage(chat, { text: "Streaming failed! ❌" });
     });
 
   } catch (err) {
