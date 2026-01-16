@@ -5,25 +5,25 @@ export default async (sock, msg, args) => {
 
     try {
         // 1. റിയാക്ഷൻ നൽകുന്നു
-        await sock.sendMessage(chat, { react: { text: "⏳", key: msg.key } });
+        await sock.sendMessage(chat, { react: { text: "📋", key: msg.key } });
 
         // 2. ആനിമേഷൻ (Safe Interval 1.2s)
         const { key } = await sock.sendMessage(chat, { text: "👺 Asura MD Loading..." });
 
         const frames = [
-`╔━━•❲👺Asura MD❳•━━━❥❥❥ 
+` ╔━━•❲👺Asura MD❳•━━━❥❥❥ 
  ┃⌛ ▰▱▱▱▱▱▱▱▱▱ 🔸️10%
  ╚━━━━━━━━━━━━━❥❥❥`,
-`╔━━•❲👺Asura MD❳•━━━❥❥❥ 
+` ╔━━•❲👺Asura MD❳•━━━❥❥❥ 
  ┃⏳ ▰▰▰▰▱▱▱▱▱▱ 🔸️40%
  ╚━━━━━━━━━━━━━❥❥❥`,
-`╔━━•❲👺Asura MD❳•━━━❥❥❥ 
+` ╔━━•❲👺Asura MD❳•━━━❥❥❥ 
  ┃⌛ ▰▰▰▰▰▰▰▱▱▱ 🔸️70%
  ╚━━━━━━━━━━━━━❥❥❥`,
-`╔━━•❲👺Asura MD❳•━━━❥❥❥ 
+` ╔━━•❲👺Asura MD❳•━━━❥❥❥ 
  ┃⏳ ▰▰▰▰▰▰▰▰▰▰ 🔸️100%      
  ╚━━━━━━━━━━━━━❥❥❥`,
-`╔━━•❲👺Asura MD❳•━━━❥❥❥ 
+` ╔━━•❲👺Asura MD❳•━━━❥❥❥ 
  ┃✅ ▰▰▰▰▰▰▰▰▰▰ 🔸️100%   
  ┃👺 Asura MD Engine Ready!
  ╚━━━━━━━━━━━━━❥❥❥
