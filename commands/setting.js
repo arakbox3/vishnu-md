@@ -1,83 +1,56 @@
+import fs from 'fs';
+
 export default async (sock, msg, args) => {
     const chat = msg.key.remoteJid;
     const sender = msg.key.participant || msg.key.remoteJid;
-    const isGroup = chat.endsWith('@g.us');
     const botId = sock.user.id.split(':')[0] + '@s.whatsapp.net';
+    const isOwner = botId.includes(sender.split('@')[0]);
 
-    // ഡാറ്റാബേസ് സെറ്റപ്പ്
-    if (!global.db) global.db = { groups: {}, settings: { mode: 'public', antispam: false } };
-    if (!global.db.groups[chat]) global.db.groups[chat] = { antilink: false, welcome: false };
-
+    // തമ്പ്നെയിൽ ചിത്രത്തിന്റെ പാത്ത്
+    const imagePath = './media/thumb.jpg'; 
     const body = (msg.message?.conversation || msg.message?.extendedTextMessage?.text || "").toLowerCase();
-    const command = body.split(' ')[0].slice(1); // കമാൻഡ് എടുക്കുന്നു
-    const action = body.split(' ')[1]; // on/off/public/private എടുക്കുന്നു
+    
+    // ഡാറ്റാബേസ് സെറ്റപ്പ്
+    if (!global.db) global.db = { settings: { mode: 'public' } };
 
-    // 1. MODE (Public/Private)
-    if (command === 'mode') {
-        if (action === 'public') {
-            global.db.settings.mode = 'public';
-            return await sock.sendMessage(chat, { text: "🌐 *BOT MODE SET TO PUBLIC*" });
-        } else if (action === 'private') {
-            global.db.settings.mode = 'private';
-            return await sock.sendMessage(chat, { text: "🔒 *BOT MODE SET TO PRIVATE*" });
-        }
+    // കമാൻഡ് ചെക്കിംഗ്
+    if (body === '.public' && isOwner) {
+        global.db.settings.mode = 'public';
+        return await sendStatus(sock, chat, "🌐 PUBLIC MODE ENABLED", imagePath);
     }
 
-    // 2. ANTILINK (on/off)
-    if (command === 'antilink' && isGroup) {
-        global.db.groups[chat].antilink = (action === 'on');
-        return await sock.sendMessage(chat, { text: `🛡️ *ANTILINK:* ${action === 'on' ? 'ON' : 'OFF'}` });
-    }
-
-    // 3. ANTISPAM (on/off)
-    if (command === 'antispam') {
-        global.db.settings.antispam = (action === 'on');
-        return await sock.sendMessage(chat, { text: `⚠️ *ANTISPAM:* ${action === 'on' ? 'ON' : 'OFF'}` });
-    }
-
-    // 4. WELCOME (on/off)
-    if (command === 'welcome' && isGroup) {
-        global.db.groups[chat].welcome = (action === 'on');
-        return await sock.sendMessage(chat, { text: `👋 *WELCOME:* ${action === 'on' ? 'ON' : 'OFF'}` });
-    }
-
-    // SETTINGS MENU (.setting)
-    if (command === 'setting' || command === 'settings') {
-        const menu = `
-╭━━〔 𓆩 👺 *ASURA MD* 𓆪 〕━━┈⊷
-┃
-┃ ⚙️ *MAIN SETTINGS*
-┃
-┃ 🔒 *MODE:* ${global.db.settings.mode.toUpperCase()}
-┃ 🛡️ *ANTILINK:* ${global.db.groups[chat].antilink ? 'ON ✅' : 'OFF ❌'}
-┃ ⚠️ *ANTISPAM:* ${global.db.settings.antispam ? 'ON ✅' : 'OFF ❌'}
-┃ 👋 *WELCOME:* ${global.db.groups[chat].welcome ? 'ON ✅' : 'OFF ❌'}
-┃
-┣━━━━━━━━━━━━━━━┈⊷
-┃ 💡 *Usage:*
-┃ .mode public/private
-┃ .antilink on/off
-┃ .antispam on/off
-┃ .welcome on/off
-╰━━━━━━━━━━━━━━━┈⊷`;
-        return await sock.sendMessage(chat, { text: menu });
-    }
-
-    // --- ബാക്ക്ഗ്രൗണ്ട് ലിങ്ക് ഫിൽട്ടർ (ഇത് ഒരിക്കൽ മാത്രം സെറ്റ് ചെയ്യും) ---
-    if (!global.asuraWatcher) {
-        global.asuraWatcher = true;
-        sock.ev.on('messages.upsert', async (update) => {
-            const m = update.messages[0];
-            if (!m.message || m.key.fromMe) return;
-            const cJid = m.key.remoteJid;
-
-            // Antilink Execution
-            if (cJid.endsWith('@g.us') && global.db.groups[cJid]?.antilink) {
-                const text = m.message.conversation || m.message.extendedTextMessage?.text || "";
-                if (/(https?:\/\/[^\s]+|www\.[^\s]+)/gi.test(text)) {
-                    await sock.sendMessage(cJid, { delete: m.key });
-                }
-            }
-        });
+    if (body === '.private' && isOwner) {
+        global.db.settings.mode = 'private';
+        return await sendStatus(sock, chat, "🔒 PRIVATE MODE ENABLED", imagePath);
     }
 };
+
+
+async function sendStatus(sock, chat, statusText, imagePath) {
+    const design = `*👺⃝⃘̉̉̉━━━━━━━━━◆◆◆◆◆*
+*┊ ┊ ┊ ┊ ┊*
+*┊ ┊ ✫ ˚㋛ ⋆｡ ❀*
+*┊ ☪︎⋆*
+*⊹* 🪔 *ᴡʜᴀᴛꜱᴀᴘᴘ ᴍɪɴɪ ʙᴏᴛ*
+*✧* 「 👺Asura MD 」
+*╰────────────❂*
+╔━━━━━━━━━━❥❥❥
+┃ °☆°☆°☆°☆°☆°☆°☆°☆°
+┃  ${statusText}
+╚━━━━⛥❖⛥━━━❥❥❥
+
+> *✅ Select a command from the list above and type it with a dot.*
+
+© 👺 𝐴𝑠𝑢𝑟𝑎 𝑀𝐷 ᴍɪɴɪ ʙᴏᴛ
+𝑠ɪᴍᴘʟᴇ ᴡᴀʙᴏᴛ ᴍᴀᴅᴇ ʙʏ 𝑎𝑟𝑢𝑛.𝑐𝑢𝑚𝑎𝑟 ヅ
+> 📢 Join our channel: https://whatsapp.com/channel/0029VbB59W9GehENxhoI5l24`;
+
+    if (fs.existsSync(imagePath)) {
+        await sock.sendMessage(chat, { 
+            image: { url: imagePath }, 
+            caption: design 
+        });
+    } else {
+        await sock.sendMessage(chat, { text: design });
+    }
+}
