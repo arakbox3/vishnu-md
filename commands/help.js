@@ -11,19 +11,19 @@ export default async (sock, msg, args) => {
         const { key } = await sock.sendMessage(chat, { text: "👺 Asura MD Loading..." });
 
         const frames = [
- `╔━━•❲👺Asura MD❳•━━━❥❥❥ 
+ ` ╔━━•❲👺Asura MD❳•━━━❥❥❥ 
    ┃⌛ ▰▱▱▱▱▱▱▱▱▱ 🔸️10%
    ╚━━━━━━━━━━━━━❥❥❥`,
- `╔━━•❲👺Asura MD❳•━━━❥❥❥ 
+ ` ╔━━•❲👺Asura MD❳•━━━❥❥❥ 
    ┃⏳ ▰▰▰▰▱▱▱▱▱▱ 🔸️40%
    ╚━━━━━━━━━━━━━❥❥❥`,
- `╔━━•❲👺Asura MD❳•━━━❥❥❥ 
+ ` ╔━━•❲👺Asura MD❳•━━━❥❥❥ 
    ┃⌛ ▰▰▰▰▰▰▰▱▱▱ 🔸️70%
    ╚━━━━━━━━━━━━━❥❥❥`,
- `╔━━•❲👺Asura MD❳•━━━❥❥❥ 
+ ` ╔━━•❲👺Asura MD❳•━━━❥❥❥ 
    ┃⏳ ▰▰▰▰▰▰▰▰▰▰ 🔸️100%      
    ╚━━━━━━━━━━━━━❥❥❥`,
- `╔━━•❲👺Asura MD❳•━━━❥❥❥ 
+ ` ╔━━•❲👺Asura MD❳•━━━❥❥❥ 
    ┃✅ ▰▰▰▰▰▰▰▰▰▰ 🔸️100%   
    ┃👺 Asura MD Engine Ready!
    ╚━━━━━━━━━━━━━❥❥❥
@@ -66,6 +66,7 @@ export default async (sock, msg, args) => {
 ┃ ⊙🤯 .Play–built-in games.
 ┃ ⊙📢 .Tagall–Mention all group members.
 ┃ ⊙📷 .Image <name>–Search and save photos.
+┃ ⊙⚙️ .setting–All bot features
 ╚━━━⛥❖⛥━━━❥❥❥
 ┃ °☆°☆°☆°☆°☆°☆°☆°☆°
 ╠━━━━⛥❖⛥━━━❥❥❥
