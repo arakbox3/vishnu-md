@@ -11,23 +11,46 @@ export default async (sock, msg, args) => {
         const { key } = await sock.sendMessage(chat, { text: "👺 Asura MD Loading..." });
 
         const frames = [
- ` ╔━━•❲👺Asura MD❳•━━━❥❥❥ 
-   ┃⌛ ▰▱▱▱▱▱▱▱▱▱ 🔸️10%
-   ╚━━━━━━━━━━━━━❥❥❥`,
- ` ╔━━•❲👺Asura MD❳•━━━❥❥❥ 
-   ┃⏳ ▰▰▰▰▱▱▱▱▱▱ 🔸️40%
-   ╚━━━━━━━━━━━━━❥❥❥`,
- ` ╔━━•❲👺Asura MD❳•━━━❥❥❥ 
-   ┃⌛ ▰▰▰▰▰▰▰▱▱▱ 🔸️70%
-   ╚━━━━━━━━━━━━━❥❥❥`,
- ` ╔━━•❲👺Asura MD❳•━━━❥❥❥ 
-   ┃⏳ ▰▰▰▰▰▰▰▰▰▰ 🔸️100%      
-   ╚━━━━━━━━━━━━━❥❥❥`,
- ` ╔━━•❲👺Asura MD❳•━━━❥❥❥ 
-   ┃✅ ▰▰▰▰▰▰▰▰▰▰ 🔸️100%   
-   ┃👺 Asura MD Engine Ready!
-   ╚━━━━━━━━━━━━━❥❥❥
-  > *© ᴄʀᴇᴀᴛᴇᴅ ʙʏ 👺Asura MD*`,
+`❲👺Asura MD❳ 
+⌛Loading.
+ 🔹️▰▱▱▱▱▱▱▱▱▱ 🔸️10%`,
+
+`•❲👺Asura MD❳•
+ ⏳Loading.. 
+🔹️ ▰▰▱▱▱▱▱▱▱▱ 🔸️20%`,
+
+`••❲👺Asura MD❳•• 
+⏳Loading... 
+🔹️ ▰▰▰▱▱▱▱▱▱▱ 🔸️30%`,
+
+`•••❲👺Asura MD❳••• 
+⌛Loading. 
+🔹️ ▰▰▰▰▱▱▱▱▱▱ 🔸️40%`,
+
+`❲👺Asura MD❳ 
+⏳Loading.. 
+🔹️ ▰▰▰▰▰▱▱▱▱▱ 🔸️50%`,
+
+`•❲👺Asura MD❳•
+ ⌛Loading...
+🔹️ ▰▰▰▰▰▰▱▱▱▱ 🔸️60%`,
+
+`••❲👺Asura MD❳•• 
+⏳Loading. 
+🔹️▰▰▰▰▰▰▰▱▱▱ 🔸️70%`,
+
+`•••❲👺Asura MD❳••• 
+⌛Loading.. 
+🔹️ ▰▰▰▰▰▰▰▰▱▱ 🔸️80%`,
+
+`❲👺Asura MD❳ 
+⏳Loading... 
+🔹️ ▰▰▰▰▰▰▰▰▰▱ 🔸️90%`,
+
+`•❲👺Asura MD❳• 
+✅ ▰▰▰▰▰▰▰▰▰▰ 🔸️100%
+ 👺 Asura MD Engine Ready!`,
+
         ];
 
         for (let frame of frames) {
