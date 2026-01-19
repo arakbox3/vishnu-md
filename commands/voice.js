@@ -1,67 +1,60 @@
 import * as googleTTS from 'google-tts-api';
-import { exec } from 'child_process';
-import { Readable } from 'stream';
+import fs from 'fs';
 
 export default async (sock, msg, args) => {
     const chat = msg.key.remoteJid;
-    
-    if (args.length < 2) {
-        return sock.sendMessage(chat, { 
-            text: "*Usage:* .voice [type] [text]\n\n*Types:* male, female, baby, devil\n*Example:* .voice devil സുഖമാണോ" 
-        }, { quoted: msg });
-    }
+    let text = args.join(' ');
+    const thumbPath = './media/thumb.jpg'; 
 
-    const type = args[0].toLowerCase();
-    const text = args.slice(1).join(' ');
-    
-    // മലയാളം ആണോ എന്ന് നോക്കുന്നു, അല്ലെങ്കിൽ ഇംഗ്ലീഷ് (Auto Detection)
-    const isMalayalam = /[അ-ഹ]/.test(text);
-    const lang = isMalayalam ? 'ml' : 'en';
+    if (!text) return sock.sendMessage(chat, { text: "🎤text message..." }, { quoted: msg });
 
     try {
-        // Google TTS URL (Direct Stream URL)
-        const url = googleTTS.getAudioUrl(text, {
+        // --- ഹ്യൂമൻ വോയ്‌സ് തോന്നിപ്പിക്കാനുള്ള വിദ്യ (Smart Logic) ---
+        // 1. ഒന്നിലധികം വാക്കുകൾ ഉണ്ടെങ്കിൽ ഇടയിൽ ചെറിയൊരു വിരാമം വരാൻ സ്പേസിനെ കോമയാക്കുന്നു.
+        // 2. ചോദ്യം ചോദിക്കുന്ന വാക്കുകൾ ഉണ്ടെങ്കിൽ അവസാനം ചോദ്യചിഹ്നം ചേർക്കുന്നു.
+        
+        let processedText = text;
+        if (text.length > 10) {
+            processedText = text.replace(/\s+/g, ', '); // വാക്കുകൾക്കിടയിൽ കോമയിട്ടാൽ ഗൂഗിൾ ശ്വാസം വിടുന്നത് പോലെ ഇടവേളയെടുക്കും
+        }
+        
+        // മലയാളം ചോദ്യങ്ങൾ തിരിച്ചറിയാൻ
+        if (/(എന്ത്|എവിടെ|എങ്ങനെ|ആര്|ആണോ|സുഖമാണോ)/i.test(text)) {
+            processedText += '?';
+        }
+
+        // --- ലാംഗ്വേജ് ഡിറ്റക്ഷൻ ---
+        let lang = 'ml'; 
+        if (/[a-zA-Z]/.test(text)) lang = 'en';
+        else if (/[ऀ-ॿ]/.test(text)) lang = 'hi';
+        else if (/[ീ-௿]/.test(text)) lang = 'ta';
+        else if (/[അ-ഹ]/.test(text)) lang = 'ml';
+
+        // Direct Stream URL
+        const url = googleTTS.getAudioUrl(processedText, {
             lang: lang,
             slow: false,
             host: 'https://translate.google.com',
         });
 
-        // ശബ്ദം മാറ്റാനുള്ള FFmpeg ഫിൽട്ടറുകൾ
-        let filter = '';
-        switch (type) {
-            case 'male':
-                filter = 'asetrate=44100*0.8,atempo=1.25,bass=g=15'; // കട്ടി കൂടിയ വോയ്‌സ്
-                break;
-            case 'female':
-                filter = 'asetrate=44100*1.2,atempo=0.85'; // സ്ത്രീ ശബ്ദം
-                break;
-            case 'baby':
-                filter = 'asetrate=44100*1.6,atempo=0.6'; // കുട്ടി ശബ്ദം
-                break;
-            case 'devil':
-                filter = 'asetrate=44100*0.5,atempo=2.0,aecho=0.8:0.88:60:0.4'; // പേടിപ്പെടുത്തുന്ന ശബ്ദം
-                break;
-            default:
-                filter = 'atempo=1.0'; // നോർമൽ
-        }
-
-        const cmd = `ffmpeg -i "${url}" -af "${filter}" -f oppus -acodec libopus -vbr on -compression_level 10 -f ogg -`;
-
-        exec(cmd, { encoding: 'buffer' }, async (error, stdout) => {
-            if (error) {
-                console.error(error);
-                return sock.sendMessage(chat, { text: "Voice conversion failed!" });
+        await sock.sendMessage(chat, { 
+            audio: { url: url }, 
+            mimetype: 'audio/ogg', 
+            ptt: true,
+            contextInfo: {
+                externalAdReply: {
+                    title: "ASURA MD SMART VOICE",
+                    body: "Human-like Pronunciation Engine",
+                    thumbnail: fs.existsSync(thumbPath) ? fs.readFileSync(thumbPath) : null,
+                    mediaType: 1,
+                    renderLargerThumbnail: true,
+                    sourceUrl: "https://whatsapp.com/channel/0029VbB59W9GehENxhoI5l24"
+                }
             }
-
-            await sock.sendMessage(chat, { 
-                audio: stdout, 
-                mimetype: 'audio/ogg; codecs=opus', 
-                ptt: true 
-            }, { quoted: msg });
-        });
+        }, { quoted: msg });
 
     } catch (e) {
         console.error(e);
-        await sock.sendMessage(chat, { text: "Error in generating voice!" });
+        await sock.sendMessage(chat, { text: "Error!" });
     }
 };
