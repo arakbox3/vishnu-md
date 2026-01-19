@@ -1,5 +1,6 @@
 import * as googleTTS from 'google-tts-api';
 import fs from 'fs';
+import axios from 'axios';
 
 export default async (sock, msg, args) => {
     const chat = msg.key.remoteJid;
@@ -10,41 +11,36 @@ export default async (sock, msg, args) => {
 
     try {
         // --- ഹ്യൂമൻ വോയ്‌സ് ലോജിക് ---
-        let processedText = text;
-        if (text.length > 10) {
-            processedText = text.replace(/\s+/g, ', '); 
-        }
-        
-        if (/(എന്ത്|എവിടെ|എങ്ങനെ|ആര്|ആണോ|സുഖമാണോ)/i.test(text)) {
-            processedText += '?';
-        }
+        let processedText = text.length > 10 ? text.replace(/\s+/g, ', ') : text;
+        if (/(എന്ത്|എവിടെ|എങ്ങനെ|ആര്|ആണോ|സുഖമാണോ)/i.test(text)) processedText += '?';
 
         // --- ലാംഗ്വേജ് ഡിറ്റക്ഷൻ ---
         let lang = 'en';
         if (/[\u0D00-\u0D7F]/.test(text)) lang = 'ml';
         else if (/[\u0B80-\u0BFF]/.test(text)) lang = 'ta';
         else if (/[\u0900-\u097F]/.test(text)) lang = 'hi';
-        else if (/[\u0C00-\u0C7F]/.test(text)) lang = 'te';
-        else if (/[\u0600-\u06FF]/.test(text)) lang = 'ur';
+        else if (/[\u0600-\u06FF]/.test(text)) lang = 'ar';
         else if (/[a-zA-Z]/.test(text)) lang = 'en';
 
-        // Direct Stream URL (No Download)
+        // --- Direct URL fetch (No Download) ---
         const url = googleTTS.getAudioUrl(processedText.slice(0, 200), {
             lang: lang,
             slow: false,
             host: 'https://translate.google.com',
         });
 
-        // വോയ്‌സ് അയക്കുന്നു
+        // യുആർഎൽ നേരിട്ട് ബഫർ ആയി എടുക്കുന്നു (ഇതാണ് ഏറ്റവും സുരക്ഷിതമായ രീതി)
+        const response = await axios.get(url, { responseType: 'arraybuffer' });
+        const audioBuffer = Buffer.from(response.data, 'utf-8');
+
         await sock.sendMessage(chat, { 
-            audio: { url: url }, 
-            mimetype: 'audio/ogg; codecs=opus', 
+            audio: audioBuffer, 
+            mimetype: 'audio/ogg', 
             ptt: true,
-            waveform: new Uint8Array([0, 0, 100, 0, 50, 0, 100, 0, 50, 100, 0, 50, 100, 0, 100]), // Custom Waveform lines
             contextInfo: {
                 externalAdReply: {
-                    title: `ASURA MD AI VOICE - ${lang.toUpperCase()}`,
-                    body: "Smart AI Voice Engine",
+                    title: `ASURA AI VOICE - ${lang.toUpperCase()}`,
+                    body: "No-Download High Quality Stream",
                     thumbnail: fs.existsSync(thumbPath) ? fs.readFileSync(thumbPath) : null,
                     mediaType: 1,
                     renderLargerThumbnail: true,
@@ -56,6 +52,6 @@ export default async (sock, msg, args) => {
 
     } catch (e) {
         console.error("Voice Error:", e);
-        await sock.sendMessage(chat, { text: "Error: വോയ്‌സ് അയക്കാൻ കഴിഞ്ഞില്ല!" });
+        await sock.sendMessage(chat, { text: "Error: വോയ്‌സ് ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല." });
     }
 };
