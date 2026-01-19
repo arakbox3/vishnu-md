@@ -41,7 +41,7 @@ export default async (sock, msg, args) => {
         // വോയ്‌സ് മെസ്സേജ് അയക്കുന്നു
         await sock.sendMessage(chat, { 
             audio: audioBuffer, 
-            mimetype: 'audio/opus', 
+            mimetype: 'audio/ogg', 
             ptt: true,
             contextInfo: {
                 externalAdReply: {
