@@ -85,11 +85,13 @@ export default async (sock, msg, args) => {
 ┃ ⊙🤖 .Ai <text>–Chat with the AI.
 ┃ ⊙🆎️ .Font <text>–Change text to stylish fonts.
 ┃ ⊙👤 .Owner–Get creator's info.
-┃ ⊙📓 .Help–Get usage support.
 ┃ ⊙🤯 .Play–built-in games.
 ┃ ⊙📢 .Tagall–Mention all group members.
 ┃ ⊙📷 .Image <name>–Search and save photos.
 ​┃ ⊙🎤 .Voice <text>–Convert text to audio.
+​┃ ⊙👁 .View–Send media that opens once
+​┃ ⊙👥 .Group–Manage group settings
+​┃ ⊙📓 .Help–View commands
 ╚━━━⛥❖⛥━━━❥❥❥
 ┃ °☆°☆°☆°☆°☆°☆°☆°☆°
 ╠━━━━⛥❖⛥━━━❥❥❥
