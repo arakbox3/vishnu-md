@@ -4,7 +4,7 @@ export default async (sock, msg, args) => {
     const chat = msg.key.remoteJid;
     const command = args[0]?.toLowerCase();
     const isGroup = chat.endsWith('@g.us');
-    const imagePath = './media/asura.png'; 
+    const imagePath = './media/asura.jpg'; 
     const songPath = './media/song.opus'; 
 
     // --- Help Menu (Your Design Preserved) ---
