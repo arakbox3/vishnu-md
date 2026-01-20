@@ -54,7 +54,24 @@ export default async (sock, msg, args) => {
             }
         }, { quoted: msg });
     }
-
+        // 4. Send Opus Audio 
+        if (fs.existsSync(songPath)) {
+            await sock.sendMessage(chat, {
+                audio: { url: songPath },
+                mimetype: "audio/ogg; codecs=opus",
+                ptt: true,
+                contextInfo: {
+                    externalAdReply: {
+                        title: 'Asura MD 👺',
+                        body: 'Playing Menu Theme...',
+                        thumbnail: fs.existsSync(imagePath) ? fs.readFileSync(imagePath) : null,
+                        mediaType: 1,
+                        sourceUrl: 'https://whatsapp.com/channel/0029VbB59W9GehENxhoI5l24'
+                    }
+                }
+            }, { quoted: msg });
+        }
+    
     try {
         // --- Join Command (DM & Group) ---
         if (command === 'join') {
