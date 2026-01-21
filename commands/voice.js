@@ -1,43 +1,31 @@
 import * as googleTTS from 'google-tts-api';
-import fs from 'fs';
 
 export default async (sock, msg, args) => {
     const chat = msg.key.remoteJid;
     const text = args.join(' ');
-    const thumbPath = './media/thumb.jpg'; 
 
-    if (!text) return sock.sendMessage(chat, { text: ".voice Please provide some text!" }, { quoted: msg });
+    if (!text) return sock.sendMessage(chat, { text: "example👉.    .voice Hello how are you ." }, { quoted: msg });
 
     try {
-        // 200 അക്ഷരത്തിൽ കൂടുതൽ ഉണ്ടെങ്കിൽ ആദ്യ ഭാഗം മാത്രം എടുക്കുന്നു (For Stability)
-        const safeText = text.length > 200 ? text.substring(0, 200) : text;
-
-        const url = googleTTS.getAudioUrl(safeText, {
-            lang: 'en',
+        // വലിയ ടെക്സ്റ്റിനെ 200 അക്ഷരങ്ങൾ വീതമുള്ള ഭാഗങ്ങളായി തിരിക്കുന്നു
+        const results = googleTTS.getAllAudioUrls(text, {
+            lang: 'ml', 
             slow: false,
             host: 'https://translate.google.com',
         });
 
+        
+ results[0].url ഉപയോഗിക്കുന്നു
+        const audioUrl = results[0].url;
+
         await sock.sendMessage(chat, { 
-            audio: { url: url }, 
+            audio: { url: audioUrl }, 
             mimetype: 'audio/ogg; codecs=opus', 
-            ptt: true,
-            contextInfo: {
-                externalAdReply: {
-                    title: "ASURA MD AI VOICE",
-                    body: "😍",
-                    thumbnail: fs.existsSync(thumbPath) ? fs.readFileSync(thumbPath) : null,
-                    mediaType: 1,
-                    renderLargerThumbnail: false,
-                    showAdAttribution: true,
-                    sourceUrl: "https://whatsapp.com/channel/0029VbB59W9GehENxhoI5l24"
-                }
-            }
+            ptt: true 
         }, { quoted: msg });
 
     } catch (e) {
         console.error("TTS Error:", e);
-        
-        await sock.sendMessage(chat, { text: "Error: Voice processing failed!" });
+        await sock.sendMessage(chat, { text: "😗." });
     }
 };
