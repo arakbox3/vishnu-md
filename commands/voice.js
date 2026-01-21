@@ -27,7 +27,7 @@ export default async (sock, msg, args) => {
 
             await sock.sendMessage(chat, { 
                 audio: { url: audioUrl }, 
-                mimetype: 'audio/ogg; codecs=opus', 
+                mimetype: 'audio/mpeg', 
                 ptt: true 
             }, { quoted: msg });
         } else {
