@@ -1,62 +1,55 @@
-import axios from 'axios';
+import googleIt from 'google-it';
+import fs from 'fs';
 
 export default async (sock, msg, args) => {
-    const from = msg.key.remoteJid;
-    const text = args.join(" ");
+    const chat = msg.key.remoteJid;
+    const text = args.join(' ');
+    const thumbPath = './image/thumb.jpg'; 
 
-    if (!text) {
-        return sock.sendMessage(from, { text: "❌ Please provide a question!\nExample: .ai who is Cristiano Ronaldo?" });
-    }
+    if (!text) return sock.sendMessage(chat, { text: ".Ai  who is Cr7" }, { quoted: msg });
 
-    let thinkingMsg;
     try {
-        // 1. റിയാക്ഷൻ (Processing)
-        await sock.sendMessage(from, { react: { text: "🧠", key: msg.key } });
+        // ഗൂഗിൾ സെർച്ച് ചെയ്യുന്നു
+        const results = await googleIt({ query: text, 'no-display': true });
 
-        // 2. ആനിമേഷൻ (Thinking...)
-        thinkingMsg = await sock.sendMessage(from, { text: "👺 Asura MD is thinking..." });
-
-        let aiResponse = "";
-
-        // --- 3 POWERFUL API LOGIC ---
-        try {
-            // API 1: Itzpire (High speed)
-            const res1 = await axios.get(`https://itzpire.com/ai/gpt-web?q=${encodeURIComponent(text)}`);
-            aiResponse = res1.data.data;
-        } catch (e) {
-            try {
-                // API 2: Sandipapi (GPT-4 based)
-                const res2 = await axios.get(`https://sandipbaruwal.onrender.com/gpt?prompt=${encodeURIComponent(text)}`);
-                aiResponse = res2.data.answer;
-            } catch (e2) {
-                // API 3: Guru (Backup)
-                const res3 = await axios.get(`https://api.guruapi.tech/ai/gpt4?username=asura&query=${encodeURIComponent(text)}`);
-                aiResponse = res3.data.msg;
-            }
+        if (!results || results.length === 0) {
+            return sock.sendMessage(chat, { text: "ERROR!" });
         }
 
-        if (!aiResponse) throw new Error("No response from any AI");
-
-        const aiMsg = `
-${aiResponse}
-
- ⊙ 𝚀𝚞𝚎𝚛𝚢 : ${text.length > 20 ? text.substring(0, 20) + "..." : text}
-
-> *© ᴄʀᴇᴀᴛᴇᴅ ʙʏ 👺Asura MD*`;
-
-        try {
-            await sock.sendMessage(from, { text: aiMsg, edit: thinkingMsg.key });
-        } catch (editError) {
-            await sock.sendMessage(from, { text: aiMsg });
-        }
+        let searchResultText = `🔍 *👺 ASURA MD SEARCH RESULTS* \n\n`;
         
-        await sock.sendMessage(from, { react: { text: "✅", key: msg.key } });
+        results.forEach((res, index) => {
+            searchResultText += `*${index + 1}. ${res.title}*\n`;
+            searchResultText += `🔗 ${res.link}\n`;
+            searchResultText += `📄 ${res.snippet}\n\n`;
+        });
+
+        // റിസൾട്ട് ഒരു ടെക്സ്റ്റ് ഫയൽ ആയി അയക്കുന്നു (ഡൗൺലോഡ് ഒഴിവാക്കാൻ)
+        const fileName = 'search_results.txt';
+        fs.writeFileSync(fileName, searchResultText);
+
+        await sock.sendMessage(chat, {
+            document: fs.readFileSync(fileName),
+            mimetype: 'text/plain',
+            fileName: `${text}_results.txt`,
+            caption: `✅ *👺 ASURA MD* ${text}`,
+            contextInfo: {
+                externalAdReply: {
+                    title: "ASURA  MD",
+                    body: "Images, Videos, and Links found",
+                    thumbnail: fs.existsSync(thumbPath) ? fs.readFileSync(thumbPath) : null,
+                    mediaType: 1,
+                    renderLargerThumbnail: true,
+                    sourceUrl: "https://google.com"
+                }
+            }
+        }, { quoted: msg });
+
+        // അയച്ച ശേഷം താൽക്കാലിക ഫയൽ ഡിലീറ്റ് ചെയ്യുന്നു
+        fs.unlinkSync(fileName);
 
     } catch (e) {
-        console.error("AI Chat Error:", e);
-        const errorText = "❌ All AI servers are busy. Please try again later!";
-        if (thinkingMsg) {
-            await sock.sendMessage(from, { text: errorText, edit: thinkingMsg.key }).catch(() => sock.sendMessage(from, { text: errorText }));
-        }
+        console.error("Search Error:", e);
+        await sock.sendMessage(chat, { text: "Error!" });
     }
 };
