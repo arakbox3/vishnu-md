@@ -1,4 +1,4 @@
-import gis from 'g-it-s'; 
+import gis from 'g-i-s'; 
 export default async (sock, msg, args) => {
     const chat = msg.key.remoteJid;
     const query = args.join(' ');
