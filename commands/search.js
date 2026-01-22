@@ -1,38 +1,65 @@
 import axios from 'axios';
-
+import fetch from 'node-fetch';
 export default async (sock, msg, args) => {
     const chat = msg.key.remoteJid;
     const query = args.join(' ');
+    const command = msg.body ? msg.body.split(' ')[0].toLowerCase() : '';
 
-    if (!query) return sock.sendMessage(chat, { text: "🔍 എന്താണ് തിരയേണ്ടത്? \nExample: .Search Space" }, { quoted: msg });
+    // ഇൻപുട്ട് ഇല്ലെങ്കിൽ മറുപടി നൽകുന്നു
+    if (!query) {
+        return await sock.sendMessage(chat, { 
+            text: `*ASURA MD SEARCH ENGINE*\n\nExample: \`\`\`.Search write a kutty story\`\`\``
+        }, { quoted: msg });
+    }
 
     try {
-        // വിക്കിപീഡിയ ഒഫീഷ്യൽ എപിഐ വഴി വിവരങ്ങൾ എടുക്കുന്നു (ഇത് ഫ്രീ ആണ്)
-        const url = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`;
-        const response = await axios.get(url);
-        const data = response.data;
+        // റിക്ഷൻ നൽകുന്നു
+        await sock.sendMessage(chat, { react: { text: '🤖', key: msg.key } });
 
-        if (data.type === 'disambiguation' || data.title === 'Not found') {
-            return sock.sendMessage(chat, { text: "❌ കൃത്യമായ വിവരങ്ങൾ കണ്ടെത്താനായില്ല. ദയവായി കുറച്ചുകൂടി വ്യക്തമായി ടൈപ്പ് ചെയ്യൂ." });
+        if (command === '.gpt') {
+            // GPT API സെക്ഷൻ
+            const response = await axios.get(`https://zellapi.autos/ai/chatbot?text=${encodeURIComponent(query)}`);
+            
+            if (response.data && response.data.result) {
+                const answer = response.data.result;
+                await sock.sendMessage(chat, { text: `*ASURA MD RESPONSE:*\n\n${answer}` }, { quoted: msg });
+            } else {
+                throw new Error('GPT API Error');
+            }
+
+        } else if (command === '.gemini') {
+            // Gemini API സെക്ഷൻ (Multi-API fallback system)
+            const apis = [
+                `https://vapis.my.id/api/gemini?q=${encodeURIComponent(query)}`,
+                `https://api.siputzx.my.id/api/ai/gemini-pro?content=${encodeURIComponent(query)}`,
+                `https://api.ryzendesu.vip/api/ai/gemini?text=${encodeURIComponent(query)}`,
+                `https://api.giftedtech.my.id/api/ai/geminiai?apikey=gifted&q=${encodeURIComponent(query)}`
+            ];
+
+            let success = false;
+            for (const api of apis) {
+                try {
+                    const response = await fetch(api);
+                    const data = await response.json();
+                    const result = data.message || data.data || data.answer || data.result;
+
+                    if (result) {
+                        await sock.sendMessage(chat, { text: `*ASURA MD RESPONSE:*\n\n${result}` }, { quoted: msg });
+                        success = true;
+                        break; 
+                    }
+                } catch (e) {
+                    continue; 
+                }
+            }
+
+            if (!success) throw new Error('All Gemini APIs failed');
         }
 
-        let wikiMessage = `📚 *ASURA MD SEARCH ENGINE: ${data.title.toUpperCase()}*\n\n`;
-        wikiMessage += `📝 *Description:* ${data.description || 'Information available'}\n\n`;
-        wikiMessage += `📖 *Summary:* ${data.extract}\n\n`;
-        wikiMessage += `_Source: Wikipedia_`;
-
-        // ചിത്രം ഉണ്ടെങ്കിൽ അത് സ്ട്രീം ചെയ്യുന്നു
-        if (data.thumbnail && data.thumbnail.source) {
-            await sock.sendMessage(chat, { 
-                image: { url: data.thumbnail.source }, 
-                caption: wikiMessage 
-            }, { quoted: msg });
-        } else {
-            await sock.sendMessage(chat, { text: wikiMessage }, { quoted: msg });
-        }
-
-    } catch (e) {
-        console.error("Wiki Error:", e);
-        await sock.sendMessage(chat, { text: "❌ ഈ വിഷയത്തെക്കുറിച്ച് വിവരങ്ങൾ ലഭ്യമല്ല!" });
+    } catch (error) {
+        console.error('AI Error:', error);
+        await sock.sendMessage(chat, { 
+            text: "❌ *ASURA MD ERROR:*" 
+        }, { quoted: msg });
     }
 };
