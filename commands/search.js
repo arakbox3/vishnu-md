@@ -3,7 +3,7 @@ export default async (sock, msg, args) => {
     const chat = msg.key.remoteJid;
     const query = args.join(' ');
 
-    if (!query) return sock.sendMessage(chat, { text: "🔍 .search who's cr7" }, { quoted: msg });
+    if (!query) return sock.sendMessage(chat, { text: "🔍 .Search who is Cr7" }, { quoted: msg });
 
     try {
         // റിക്ഷൻ നൽകുന്നു
@@ -12,16 +12,16 @@ export default async (sock, msg, args) => {
         // g-i-s സെർച്ച് ആരംഭിക്കുന്നു
         gis(query, async (error, results) => {
             if (error || !results || results.length === 0) {
-                return sock.sendMessage(chat, { text: "❌ ഫലങ്ങളൊന്നും ലഭിച്ചില്ല!" });
+                return sock.sendMessage(chat, { text: "⏳Loading..." });
             }
 
             // ആദ്യത്തെ ചിത്രം എടുക്കുന്നു
             const firstImage = results[0].url;
 
             // റിസൾട്ട് മെസ്സേജ് സ്റ്റൈലിഷ് ആയി നിർമ്മിക്കുന്നു
-            let searchMsg = `🌟 *ASURA MD GOOGLE SEARCH* 🌟\n\n`;
+            let searchMsg = `🌟 *👺 ASURA MD SEARCH ENGINE* 🌟\n\n`;
             searchMsg += `📝 *Query:* ${query}\n`;
-            searchMsg += `───────────────────\n\n`;
+            searchMsg += `⊙──────────────────⊙\n\n`;
 
             // ആദ്യ 5 റിസൾട്ടുകളുടെ വിവരങ്ങൾ ചേർക്കുന്നു
             results.slice(0, 5).forEach((res, index) => {
@@ -29,7 +29,9 @@ export default async (sock, msg, args) => {
                 searchMsg += `🔗 ${res.url.slice(0, 50)}...\n\n`;
             });
 
-            searchMsg += `───────────────────\n*ASURA AI SYSTEM*`;
+            searchMsg += `⊙───────────────⊙\n*© 👺 𝐴𝑠𝑢𝑟𝑎 𝑀𝐷 ᴍɪɴɪ ʙᴏᴛ
+𝑠ɪᴍᴘʟᴇ ᴡᴀʙᴏᴛ ᴍᴀᴅᴇ ʙʏ 𝑎𝑟𝑢𝑛.𝑐𝑢𝑚𝑎𝑟 ヅ
+> 📢 Join our channel: https://whatsapp.com/channel/0029VbB59W9GehENxhoI5l24*`;
 
             // ചിത്രം Caption സഹിതം അയക്കുന്നു (No Download)
             await sock.sendMessage(chat, { 
@@ -40,6 +42,6 @@ export default async (sock, msg, args) => {
 
     } catch (e) {
         console.error("GIS Search Error:", e);
-        await sock.sendMessage(chat, { text: "❌ തിരച്ചിലിനിടെ തടസ്സം നേരിട്ടു!" });
+        await sock.sendMessage(chat, { text: "⏳Loading..." });
     }
 };
