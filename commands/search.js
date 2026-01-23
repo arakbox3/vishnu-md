@@ -4,7 +4,7 @@ export default {
   name: "track",
   alias: ["trace", "fullinfo", "track"],
   desc: "Deep tracking of any global number",
-  usage: ".track 919876543210",
+  usage: ".search 919876543210",
   category: "utility",
 
   async execute(sock, msg, args) {
