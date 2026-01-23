@@ -84,7 +84,7 @@ export default async (sock, msg, args) => {
 ┃ ⊙🖼️   .Sticker
 ┃ ⊙🎲   .Game
 ┃ ⊙🎭   .Fun
-┃ ⊙🔍   .Search <text>
+┃ ⊙🔍   .Search 
 ┃ ⊙🆎️   .Font <text>
 ┃ ⊙👤   .Owner
 ┃ ⊙🤯   .Play
