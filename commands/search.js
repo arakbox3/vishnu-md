@@ -75,7 +75,7 @@ export default {
 
 "971": { n:"UAE", i:"AE", c:"Abu Dhabi", r:"Middle East", cu:"AED", sy:"د.إ", t:"+4:00", l:"Arabic", d:"Right", cd:"971", p:"0", tl:".ae", pc:"00000", pop:"9.8M", call:"00", em:"999", ar:"83k km²", bw:"GST" },
 
-"974": { n:"Qatar", i:"QA", c:"Doha", r:"Middle East", cu:"QAR", sy:"ر.ق", t:"+3:00", l:"Arabic", d:"Right", cd:"974", p:"0", tl:".qa", pc:"00000", pop:"2.7M", call:"00", em:"999", ar:"11k km²", bw:"AST" }
+"974": { n:"Qatar", i:"QA", c:"Doha", r:"Middle East", cu:"QAR", sy:"ر.ق", t:"+3:00", l:"Arabic", d:"Right", cd:"974", p:"0", tl:".qa", pc:"00000", pop:"2.7M", call:"00", em:"999", ar:"11k km²", bw:"AST" },
 };
 "212": { n:"Morocco", i:"MA", c:"Rabat", r:"Africa", cu:"MAD", sy:"د.م.", t:"+1:00", l:"Arabic", d:"Right", cd:"212", p:"0", tl:".ma", pc:"10000", pop:"37M", call:"0", em:"19", ar:"446k km²", bw:"WET" },
 
