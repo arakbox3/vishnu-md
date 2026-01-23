@@ -4,60 +4,54 @@ export default async (sock, msg, args) => {
     const from = msg.key.remoteJid;
     const query = args.join(' ');
 
-    if (!query) return sock.sendMessage(from, { text: "🔍 *എന്താണ് സെർച്ച് ചെയ്യേണ്ടത്?*\nExample: `.search Cristiano Ronaldo`" });
+    if (!query) return sock.sendMessage(from, { text: "🔍 *.search whatsapp.com*" });
 
     try {
-        await sock.sendMessage(from, { react: { text: "⚡", key: msg.key } });
+        // 1. റിയാക്ഷൻ നൽകുന്നു
+        await sock.sendMessage(from, { react: { text: "⏳", key: msg.key } });
 
-        // ഗൂഗിളിന്റെ ലൈറ്റ് വെയിറ്റ് സെർച്ച് പേജ് ഉപയോഗിക്കുന്നു
-        const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(query)}&hl=ml&gl=in`;
+        // 2. വിക്കിപീഡിയ ഓപ്പൺ API (ഇത് ബ്ലോക്ക് ആവില്ല)
+        const wikiUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`;
+        
+        const response = await axios.get(wikiUrl);
+        const data = response.data;
 
-        const { data } = await axios.get(searchUrl, {
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Linux; Android 10; SM-G960U) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Mobile Safari/537.36'
-            }
-        });
-
-        // ഗൂഗിളിലെ പ്രധാന വിവരം (Snippet) വേർതിരിച്ചെടുക്കുന്നു
-        const match = data.match(/<div class="BNeawe s3v9rd AP7Wnd"><div><div class="BNeawe s3v9rd AP7Wnd">(.*?)<\/div>/);
-        let result = match ? match[1].replace(/<[^>]+>/g, '') : "Result not found!";
-
-        if (result.includes("Result not found!")) {
-            const altMatch = data.match(/<div class="BNeawe iBp4i AP7Wnd">(.*?)<\/div>/);
-            result = altMatch ? altMatch[1].replace(/<[^>]+>/g, '') : "No direct answer found. Try a different keyword.";
-        }
-
-        // DESIGN BOX
-        const searchBox = `
-╭━━〔 👺 *ASURA MD SEARCH* 〕━━┈⊷
+        if (data.title && data.extract) {
+            // മറുപടി ബോക്സ് ഡിസൈൻ
+            const resultMsg = `
+╭━━〔 👺 *ASURA-MD SEARCH* 〕━━┈⊷
 ┃
-┃ 🔎 *QUERY:* ${query}
+┃ 📚 *Title:* ${data.title}
+┃ 🏛️ *Category:* ${data.description || 'General'}
 ┃
 ┣━━━━━━━━━━━━━━┈⊷
 ┃
-┃ ${result}
+${data.extract}
 ┃
 ╰━━━━━━━━━━━━━━━┈⊷
-> *©  ASURA MD - FAST ENGINE*`;
+> *© ASURA MD SYSTEM*`;
 
-        await sock.sendMessage(from, { 
-            text: searchBox,
-            contextInfo: {
-                externalAdReply: {
-                    title: "ASURA LIGHTNING SEARCH",
-                    body: "No API - Super Fast Result",
-                    mediaType: 1,
-                    sourceUrl: "https://www.google.com",
-                    renderLargerThumbnail: false,
-                    showAdAttribution: true
-                }
+            // ചിത്രം ഉണ്ടെങ്കിൽ അത് സഹിതം അയക്കുന്നു
+            if (data.thumbnail && data.thumbnail.source) {
+                await sock.sendMessage(from, { 
+                    image: { url: data.thumbnail.source }, 
+                    caption: resultMsg 
+                }, { quoted: msg });
+            } else {
+                await sock.sendMessage(from, { text: resultMsg }, { quoted: msg });
             }
-        }, { quoted: msg });
 
-        await sock.sendMessage(from, { react: { text: "✅", key: msg.key } });
+            await sock.sendMessage(from, { react: { text: "✅", key: msg.key } });
+        } else {
+            throw new Error("No summary found");
+        }
 
     } catch (e) {
+        // റിസൾട്ട് കിട്ടിയില്ലെങ്കിൽ മാത്രം ഇത് വരും
         console.error(e);
-        await sock.sendMessage(from, { text: "❌ Connection error! Search failed." });
+        await sock.sendMessage(from, { 
+            text: "❌ *Result Not Found!*\nകൂടുതൽ വ്യക്തമായ ഒരു വാക്ക് നൽകി നോക്കൂ (ഉദാ: .search Earth)" 
+        }, { quoted: msg });
+        await sock.sendMessage(from, { react: { text: "❌", key: msg.key } });
     }
 };
