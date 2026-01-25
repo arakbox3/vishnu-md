@@ -1,19 +1,18 @@
 import fs from 'fs';
 
-// Settings സൂക്ഷിക്കാൻ ഒരു ലോക്കൽ ഡാറ്റാബേസ് (ഫയൽ)
+// Database simulation to store settings locally
 const DB_PATH = './media/asura_db.json';
 const getDB = () => fs.existsSync(DB_PATH) ? JSON.parse(fs.readFileSync(DB_PATH)) : {};
 const saveDB = (data) => fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2));
 
 export default async (sock, msg, args) => {
     const chat = msg.key.remoteJid;
-    const isGroup = chat.endsWith('@g.us');
     const command = args[0]?.toLowerCase();
     const imagePath = './media/asura.jpg';
     const songPath = './media/song.opus';
 
-    // --- 1. Help Menu Design ---
-    if (!command) {
+    // --- 1. Help Menu Design (Updated with all commands) ---
+    if (!args[0]) {
         const helpText = `*👺⃝⃘̉̉̉━━━━━━━━━━━◆◆◆*
 *┊ ┊ ┊ ┊ ┊*
 *┊ ┊ ✫ ˚㋛ ⋆｡ ❀*
@@ -24,21 +23,26 @@ export default async (sock, msg, args) => {
 ╔━━━━━━━━━━━━❥❥❥
 ┃ 🛡️ *👺ULTIMATE GROUP MASTER*
 ┃
-┃🔹 .group id (Get current Chat ID)
+┃🔹 .group id (Get Chat ID)
 ┃🔹 .group add [number]
 ┃🔹 .group kick [tag/reply]
 ┃🔹 .group promot/demote [tag]
 ┃🔹 .group tagall [message]
-┃🔹 .group welcome on/off
-┃🔹 .group antilink on/off
-┃🔹 .group antidelete on/off
 ┃🔹 .group lock/unlock
-┃🔹 .group schedule [min] [text]
 ┃🔹 .group delete [reply]
+┃🔹 .group schedule [min] [text]
 ┃🔹 .group name/bio [text]
 ┃🔹 .group join [link]
 ┃
-┃💡 *Note:* DM-ൽ JID വെച്ചും ഉപയോഗിക്കാം
+┃✨ *SECURITY CONTROLS:*
+┃🔹 .group welcome on/off
+┃🔹 .group antilink on/off
+┃🔹 .group antidelete on/off
+┃🔹 .group antispam on/off
+┃🔹 .group antiforeign on/off
+┃🔹 .group anticall on/off
+┃🔹 .group chatbot on/off
+┃💡 .Help
 ╚━━━━━━━⛥❖⛥━━━━━━❥❥❥`;
 
         if (fs.existsSync(songPath)) {
@@ -48,23 +52,22 @@ export default async (sock, msg, args) => {
     }
 
     try {
-        // --- 2. Remote Control Logic (DM handling) ---
+        // --- 2. Target Logic (DM/Group Remote Control) ---
         let targetGroup = chat;
-        let startIdx = 1;
+        let actionIdx = 0;
 
-        // ഒരു JID നൽകിയിട്ടുണ്ടെങ്കിൽ (ഉദാ: .group 1203xxx@g.us add) അത് ടാർഗറ്റ് ആക്കും
-        if (args[1] && args[1].includes('@g.us')) {
-            targetGroup = args[1];
-            startIdx = 2;
+        if (args[0] && args[0].includes('@g.us')) {
+            targetGroup = args[0];
+            actionIdx = 1;
         }
 
-        const action = args[startIdx]?.toLowerCase();
-        const value = args.slice(startIdx + 1).join(' ');
+        const action = args[actionIdx]?.toLowerCase();
+        const value = args.slice(actionIdx + 1).join(' ');
         const db = getDB();
 
-        // Target User (Tag, Reply, or Number)
+        // User target detection
         const quoted = msg.message?.extendedTextMessage?.contextInfo;
-        let user = quoted?.participant || (quoted?.mentionedJid?.[0]) || (args[startIdx + 1] ? args[startIdx + 1].replace(/[^0-9]/g, '') + '@s.whatsapp.net' : null);
+        let user = quoted?.participant || (quoted?.mentionedJid?.[0]) || (args[actionIdx + 1] ? args[actionIdx + 1].replace(/[^0-9]/g, '') + '@s.whatsapp.net' : null);
 
         // --- 3. Command Switch System ---
         switch (action) {
@@ -72,22 +75,21 @@ export default async (sock, msg, args) => {
                 return sock.sendMessage(chat, { text: `📍 *Chat ID:* ${chat}` }, { quoted: msg });
 
             case 'welcome':
-                if (!db[targetGroup]) db[targetGroup] = {};
-                db[targetGroup].welcome = (value === 'on');
-                saveDB(db);
-                return sock.sendMessage(chat, { text: `✅ Welcome is now *${value.toUpperCase()}* for this group.` });
-
             case 'antilink':
-                if (!db[targetGroup]) db[targetGroup] = {};
-                db[targetGroup].antilink = (value === 'on');
-                saveDB(db);
-                return sock.sendMessage(chat, { text: `🛡️ Antilink is now *${value.toUpperCase()}*` });
-
             case 'antidelete':
+            case 'antispam':
+            case 'antiforeign':
+            case 'chatbot':
                 if (!db[targetGroup]) db[targetGroup] = {};
-                db[targetGroup].antidelete = (value === 'on');
+                db[targetGroup][action] = (value === 'on');
                 saveDB(db);
-                return sock.sendMessage(chat, { text: `🗑️ Antidelete is now *${value.toUpperCase()}*` });
+                return sock.sendMessage(chat, { text: `✅ *${action.toUpperCase()}* is now *${value.toUpperCase()}*` });
+
+            case 'anticall':
+                if (!db['global']) db['global'] = {};
+                db['global'].anticall = (value === 'on');
+                saveDB(db);
+                return sock.sendMessage(chat, { text: `🛡️ *ANTI-CALL* is now *${value.toUpperCase()}* (Global)` });
 
             case 'tagall':
                 const metadata = await sock.groupMetadata(targetGroup);
@@ -99,7 +101,6 @@ export default async (sock, msg, args) => {
                 break;
 
             case 'kick':
-            case 'remove':
                 await sock.groupParticipantsUpdate(targetGroup, [user], "remove");
                 break;
 
@@ -120,8 +121,7 @@ export default async (sock, msg, args) => {
                 break;
 
             case 'delete':
-                if (!quoted) return sock.sendMessage(chat, { text: "❌ സന്ദേശത്തിന് മറുപടി നൽകുക!" });
-                await sock.sendMessage(targetGroup, { delete: { remoteJid: targetGroup, fromMe: false, id: quoted.stanzaId, participant: quoted.participant } });
+                if (quoted) await sock.sendMessage(targetGroup, { delete: { remoteJid: targetGroup, fromMe: false, id: quoted.stanzaId, participant: quoted.participant } });
                 break;
 
             case 'name':
@@ -133,30 +133,26 @@ export default async (sock, msg, args) => {
                 break;
 
             case 'schedule':
-                const [time, ...messageArr] = value.split(' ');
-                const scheduleMsg = messageArr.join(' ');
-                sock.sendMessage(chat, { text: `🕒 Message set to send in ${time} minutes.` });
+                const [time, ...msgArr] = value.split(' ');
+                sock.sendMessage(chat, { text: `🕒 Scheduled in ${time} min.` });
                 setTimeout(() => {
-                    sock.sendMessage(targetGroup, { text: `🕒 *SCHEDULED MESSAGE:*\n\n${scheduleMsg}` });
+                    sock.sendMessage(targetGroup, { text: `🕒 *SCHEDULED:* ${msgArr.join(' ')}` });
                 }, parseInt(time) * 60000);
                 break;
 
             case 'join':
-                const inviteLink = args[startIdx + 1];
-                if (!inviteLink) return sock.sendMessage(chat, { text: "❌ Link നൽകുക!" });
-                const code = inviteLink.split('chat.whatsapp.com/')[1];
+                const code = args[actionIdx + 1].split('.com/')[1];
                 await sock.groupAcceptInvite(code);
                 return sock.sendMessage(chat, { text: "✅ Joined!" });
 
             default:
-                return sock.sendMessage(chat, { text: "❌ അജ്ഞാതമായ കമാൻഡ്! .group എന്ന് ടൈപ്പ് ചെയ്യുക." });
+                return sock.sendMessage(chat, { text: "❌ Invalid action." });
         }
 
-        // Action പൂർത്തിയായാൽ കൺഫർമേഷൻ അയക്കുന്നു
         await sock.sendMessage(chat, { text: `✅ *Executed:* ${action.toUpperCase()}` });
 
     } catch (e) {
         console.error(e);
-        await sock.sendMessage(chat, { text: "❌ *Error:* ബോട്ട് അഡ്മിൻ ആണെന്നും JID ശരിയാണെന്നും ഉറപ്പുവരുത്തുക!" });
+        await sock.sendMessage(chat, { text: "❌ *Failed:* Permisson Error or Invalid JID." });
     }
 };
