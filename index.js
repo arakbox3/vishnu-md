@@ -64,6 +64,7 @@ async function startAsura() {
             if (shouldReconnect) startAsura();
         } else if (connection === 'open') {
             console.log('\x1b[36m✅ Asura MD Connected Successfully!\x1b[0m');
+            handleEvents(sock); 
             const myNumber = sock.user.id.split(':')[0] + "@s.whatsapp.net";
             await sock.sendMessage(myNumber, { text: "*Asura MD is Online on WhatsApp!* 👺\n\nAll commands are now active." });
         }
