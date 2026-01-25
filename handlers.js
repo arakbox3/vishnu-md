@@ -36,14 +36,25 @@ export const handleEvents = async (sock) => {
              await sock.sendMessage(chat, { text: "🚫 *Spam Detected and Removed!*" });
         }
 
-        // --- 3. CHATBOT (Simple Reply) ---
-        if (settings.chatbot && !body.startsWith('.')) {
-            // ലളിതമായ ഒരു മറുപടി, വേണമെങ്കിൽ ഇതിൽ AI ചേർക്കാം
-            if (body.toLowerCase().includes('hello')) {
-                await sock.sendMessage(chat, { text: "Hello! I am Asura MD. How can I help you? 👺" }, { quoted: msg });
-            }
-        }
-    });
+        // --- 3. CHATBOT (Gemini AI Integration) ---
+if (settings.chatbot && !body.startsWith('.') && !msg.key.fromMe) {
+    try {
+        const model = genAI.getGenerativeModel({ 
+            model: "gemini-pro",
+            systemInstruction: "You are Asura MD AI, a powerful WhatsApp assistant. Be smart and helpful. User name is " + (msg.pushName || "User")
+        });
+
+        const result = await model.generateContent(body);
+        const response = await result.response;
+        const aiResponse = response.text();
+
+        await sock.sendMessage(chat, { 
+            text: `*👺 ASURA AI*\n\n${aiResponse}` 
+        }, { quoted: msg });
+    } catch (err) {
+        console.error("AI Chatbot Error:", err);
+    }
+}
 
     // --- 4. WELCOME & ANTI-FOREIGN NUMBER ---
     sock.ev.on('group-participants.update', async (update) => {
