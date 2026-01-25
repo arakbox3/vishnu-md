@@ -1,13 +1,18 @@
 import fs from 'fs';
 
+// Settings സൂക്ഷിക്കാൻ ഒരു ലോക്കൽ ഡാറ്റാബേസ് (ഫയൽ)
+const DB_PATH = './media/asura_db.json';
+const getDB = () => fs.existsSync(DB_PATH) ? JSON.parse(fs.readFileSync(DB_PATH)) : {};
+const saveDB = (data) => fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2));
+
 export default async (sock, msg, args) => {
     const chat = msg.key.remoteJid;
-    const command = args[0]?.toLowerCase();
     const isGroup = chat.endsWith('@g.us');
-    const imagePath = './media/asura.jpg'; 
-    const songPath = './media/song.opus'; 
+    const command = args[0]?.toLowerCase();
+    const imagePath = './media/asura.jpg';
+    const songPath = './media/song.opus';
 
-    // --- Help Menu (Your Design Preserved) ---
+    // --- 1. Help Menu Design ---
     if (!command) {
         const helpText = `*👺⃝⃘̉̉̉━━━━━━━━━━━◆◆◆*
 *┊ ┊ ┊ ┊ ┊*
@@ -17,155 +22,141 @@ export default async (sock, msg, args) => {
 *✧* 「 *\`👺Asura MD\`* 」
 *╰──────────────❂*
 ╔━━━━━━━━━━━━❥❥❥
-┃ 🛡️ *👺ASURA ULTIMATE GROUP*
-┃      *MANAGER*
+┃ 🛡️ *👺ULTIMATE GROUP MASTER*
 ┃
-┃📜 *COMMANDS:* 
-┃🔹 .group add [+91xxx]
-┃🔹 .group kick [reply/tag]
-┃🔹 .group promot [reply/tag]
-┃🔹 .group demote [reply/tag]
+┃🔹 .group id (Get current Chat ID)
+┃🔹 .group add [number]
+┃🔹 .group kick [tag/reply]
+┃🔹 .group promot/demote [tag]
+┃🔹 .group tagall [message]
+┃🔹 .group welcome on/off
+┃🔹 .group antilink on/off
+┃🔹 .group antidelete on/off
+┃🔹 .group lock/unlock
+┃🔹 .group schedule [min] [text]
 ┃🔹 .group delete [reply]
-┃🔹 .group lock (Only admins)
-┃🔹 .group unlock (Everyone)
-┃🔹 .group link (Invite link)
-┃🔹 .group revoke (Reset link)
-┃🔹 .group name [text]
-┃🔹 .group bio [text]
-┃🔹 .group tag [text]
+┃🔹 .group name/bio [text]
 ┃🔹 .group join [link]
-┃🔹 .group id (Get Chat ID)
 ┃
-┃💡 *Note:* Only for admins 
-╚━━━━━━━⛥❖⛥━━━━━━❥❥❥
-> *© ᴄʀᴇᴀᴛᴇᴅ ʙʏ 👺Asura MD*`;
+┃💡 *Note:* DM-ൽ JID വെച്ചും ഉപയോഗിക്കാം
+╚━━━━━━━⛥❖⛥━━━━━━❥❥❥`;
 
-        // Sending help menu with a thumbnail if it exists
-        return sock.sendMessage(chat, { 
-            text: helpText,
-            contextInfo: {
-                externalAdReply: {
-                    title: "ASURA MD GROUP MANAGER",
-                    body: "Ultimate Admin Tools",
-                    thumbnail: fs.existsSync(imagePath) ? fs.readFileSync(imagePath) : null,
-                    mediaType: 1,
-                    renderLargerThumbnail: true
-                }
-            }
-        }, { quoted: msg });
-    }
-        // 4. Send Opus Audio 
         if (fs.existsSync(songPath)) {
-            await sock.sendMessage(chat, {
-                audio: { url: songPath },
-                mimetype: "audio/ogg; codecs=opus",
-                ptt: true,
-                contextInfo: {
-                    externalAdReply: {
-                        title: 'Asura MD 👺',
-                        body: 'Playing Menu Theme...',
-                        thumbnail: fs.existsSync(imagePath) ? fs.readFileSync(imagePath) : null,
-                        mediaType: 1,
-                        sourceUrl: 'https://whatsapp.com/channel/0029VbB59W9GehENxhoI5l24'
-                    }
-                }
-            }, { quoted: msg });
+            await sock.sendMessage(chat, { audio: { url: songPath }, mimetype: "audio/ogg; codecs=opus", ptt: true });
         }
-    
+        return sock.sendMessage(chat, { text: helpText });
+    }
+
     try {
-        // --- Join Command (DM & Group) ---
-        if (command === 'join') {
-            const link = args[1];
-            if (!link || !link.includes('chat.whatsapp.com')) return sock.sendMessage(chat, { text: "❌ Please provide a valid group link." });
-            const code = link.split('chat.whatsapp.com/')[1];
-            await sock.groupAcceptInvite(code);
-            return sock.sendMessage(chat, { text: "✅ Successfully joined the group!" });
+        // --- 2. Remote Control Logic (DM handling) ---
+        let targetGroup = chat;
+        let startIdx = 1;
+
+        // ഒരു JID നൽകിയിട്ടുണ്ടെങ്കിൽ (ഉദാ: .group 1203xxx@g.us add) അത് ടാർഗറ്റ് ആക്കും
+        if (args[1] && args[1].includes('@g.us')) {
+            targetGroup = args[1];
+            startIdx = 2;
         }
 
-        if (!isGroup) return sock.sendMessage(chat, { text: "❌ This command can only be used in groups!" });
+        const action = args[startIdx]?.toLowerCase();
+        const value = args.slice(startIdx + 1).join(' ');
+        const db = getDB();
 
-        // --- Target Logic ---
+        // Target User (Tag, Reply, or Number)
         const quoted = msg.message?.extendedTextMessage?.contextInfo;
-        let target = quoted?.participant || (msg.message?.extendedTextMessage?.contextInfo?.mentionedJid?.[0]) || (args[1] ? args[1].replace(/[^0-9]/g, '') + '@s.whatsapp.net' : null);
+        let user = quoted?.participant || (quoted?.mentionedJid?.[0]) || (args[startIdx + 1] ? args[startIdx + 1].replace(/[^0-9]/g, '') + '@s.whatsapp.net' : null);
 
-        switch (command) {
+        // --- 3. Command Switch System ---
+        switch (action) {
             case 'id':
-                await sock.sendMessage(chat, { text: `📍 *Group ID:* ${chat}` });
-                break;
+                return sock.sendMessage(chat, { text: `📍 *Chat ID:* ${chat}` }, { quoted: msg });
+
+            case 'welcome':
+                if (!db[targetGroup]) db[targetGroup] = {};
+                db[targetGroup].welcome = (value === 'on');
+                saveDB(db);
+                return sock.sendMessage(chat, { text: `✅ Welcome is now *${value.toUpperCase()}* for this group.` });
+
+            case 'antilink':
+                if (!db[targetGroup]) db[targetGroup] = {};
+                db[targetGroup].antilink = (value === 'on');
+                saveDB(db);
+                return sock.sendMessage(chat, { text: `🛡️ Antilink is now *${value.toUpperCase()}*` });
+
+            case 'antidelete':
+                if (!db[targetGroup]) db[targetGroup] = {};
+                db[targetGroup].antidelete = (value === 'on');
+                saveDB(db);
+                return sock.sendMessage(chat, { text: `🗑️ Antidelete is now *${value.toUpperCase()}*` });
+
+            case 'tagall':
+                const metadata = await sock.groupMetadata(targetGroup);
+                const participants = metadata.participants.map(p => p.id);
+                return sock.sendMessage(targetGroup, { text: `📢 *TAGALL:* ${value || 'Attention!'}`, mentions: participants });
 
             case 'add':
-                if (!target) return sock.sendMessage(chat, { text: "👤 Please provide a number or reply to a user!" });
-                await sock.groupParticipantsUpdate(chat, [target], "add");
-                await sock.sendMessage(chat, { text: "✅ User added successfully." });
+                await sock.groupParticipantsUpdate(targetGroup, [user], "add");
                 break;
 
             case 'kick':
-                if (!target) return sock.sendMessage(chat, { text: "👤 Please tag or reply to a user to kick." });
-                await sock.groupParticipantsUpdate(chat, [target], "remove");
-                await sock.sendMessage(chat, { text: "✅ User removed successfully." });
+            case 'remove':
+                await sock.groupParticipantsUpdate(targetGroup, [user], "remove");
                 break;
 
             case 'promot':
-                if (!target) return sock.sendMessage(chat, { text: "👤 User not found." });
-                await sock.groupParticipantsUpdate(chat, [target], "promote");
-                await sock.sendMessage(chat, { text: "✅ Admin power granted." });
+                await sock.groupParticipantsUpdate(targetGroup, [user], "promote");
                 break;
 
             case 'demote':
-                if (!target) return sock.sendMessage(chat, { text: "👤 User not found." });
-                await sock.groupParticipantsUpdate(chat, [target], "demote");
-                await sock.sendMessage(chat, { text: "✅ Admin power revoked." });
-                break;
-
-            case 'delete':
-                if (!quoted) return sock.sendMessage(chat, { text: "🗑️ Please reply to a message to delete it." });
-                await sock.sendMessage(chat, { delete: { remoteJid: chat, fromMe: false, id: quoted.stanzaId, participant: quoted.participant } });
+                await sock.groupParticipantsUpdate(targetGroup, [user], "demote");
                 break;
 
             case 'lock':
-                await sock.groupSettingUpdate(chat, 'announcement');
-                await sock.sendMessage(chat, { text: "🔒 Group locked. Only admins can send messages." });
+                await sock.groupSettingUpdate(targetGroup, 'announcement');
                 break;
 
             case 'unlock':
-                await sock.groupSettingUpdate(chat, 'not_announcement');
-                await sock.sendMessage(chat, { text: "🔓 Group unlocked. Everyone can send messages." });
+                await sock.groupSettingUpdate(targetGroup, 'not_announcement');
                 break;
 
-            case 'link':
-                const inviteCode = await sock.groupInviteCode(chat);
-                await sock.sendMessage(chat, { text: `🔗 *Group Link:* https://chat.whatsapp.com/${inviteCode}` });
-                break;
-
-            case 'revoke':
-                await sock.groupRevokeInvite(chat);
-                await sock.sendMessage(chat, { text: "🔄 Group link has been reset." });
+            case 'delete':
+                if (!quoted) return sock.sendMessage(chat, { text: "❌ സന്ദേശത്തിന് മറുപടി നൽകുക!" });
+                await sock.sendMessage(targetGroup, { delete: { remoteJid: targetGroup, fromMe: false, id: quoted.stanzaId, participant: quoted.participant } });
                 break;
 
             case 'name':
-                const newName = args.slice(1).join(' ');
-                if (!newName) return sock.sendMessage(chat, { text: "📝 Please provide a new name." });
-                await sock.groupUpdateSubject(chat, newName);
+                await sock.groupUpdateSubject(targetGroup, value);
                 break;
 
             case 'bio':
-                const newBio = args.slice(1).join(' ');
-                if (!newBio) return sock.sendMessage(chat, { text: "📝 Please provide a new description." });
-                await sock.groupUpdateDescription(chat, newBio);
+                await sock.groupUpdateDescription(targetGroup, value);
                 break;
 
-            case 'tag':
-                const metadata = await sock.groupMetadata(chat);
-                const participants = metadata.participants.map(p => p.id);
-                const tagMsg = args.slice(1).join(' ') || 'Attention everyone! 👋';
-                await sock.sendMessage(chat, { text: `📢 *${tagMsg}*`, mentions: participants });
+            case 'schedule':
+                const [time, ...messageArr] = value.split(' ');
+                const scheduleMsg = messageArr.join(' ');
+                sock.sendMessage(chat, { text: `🕒 Message set to send in ${time} minutes.` });
+                setTimeout(() => {
+                    sock.sendMessage(targetGroup, { text: `🕒 *SCHEDULED MESSAGE:*\n\n${scheduleMsg}` });
+                }, parseInt(time) * 60000);
                 break;
+
+            case 'join':
+                const inviteLink = args[startIdx + 1];
+                if (!inviteLink) return sock.sendMessage(chat, { text: "❌ Link നൽകുക!" });
+                const code = inviteLink.split('chat.whatsapp.com/')[1];
+                await sock.groupAcceptInvite(code);
+                return sock.sendMessage(chat, { text: "✅ Joined!" });
 
             default:
-                await sock.sendMessage(chat, { text: "❌ Unknown command! Type `.group` for help." });
+                return sock.sendMessage(chat, { text: "❌ അജ്ഞാതമായ കമാൻഡ്! .group എന്ന് ടൈപ്പ് ചെയ്യുക." });
         }
+
+        // Action പൂർത്തിയായാൽ കൺഫർമേഷൻ അയക്കുന്നു
+        await sock.sendMessage(chat, { text: `✅ *Executed:* ${action.toUpperCase()}` });
+
     } catch (e) {
         console.error(e);
-        await sock.sendMessage(chat, { text: "❌ *Error:* Make sure the bot is an Admin!" });
+        await sock.sendMessage(chat, { text: "❌ *Error:* ബോട്ട് അഡ്മിൻ ആണെന്നും JID ശരിയാണെന്നും ഉറപ്പുവരുത്തുക!" });
     }
 };
