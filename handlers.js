@@ -20,7 +20,8 @@ export const handleEvents = async (sock) => {
         const db = getDB();
         const settings = db[chat] || {};
         const body = msg.message.conversation || msg.message.extendedTextMessage?.text || "";
-             
+        console.log("Message received from:", chat);
+      
         // --- MODE CHECK LOGIC ---
         const ownerNumber = sock.user.id.split(':')[0] + "@s.whatsapp.net";
         const isOwner = msg.key.participant === ownerNumber || msg.key.remoteJid === ownerNumber;
