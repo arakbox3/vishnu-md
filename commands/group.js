@@ -6,162 +6,114 @@ const saveDB = (data) => fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2)
 
 export default async (sock, msg, args) => {
     const chat = msg.key.remoteJid;
-    const songPath = './media/song.opus';
-    const thumbPath = './media/thumb.jpg';
+    const isGroup = chat.endsWith('@g.us');
+    
+    // മെസ്സേജ് ബോഡിയിൽ നിന്ന് കമാൻഡ് തിരിച്ചറിയുന്നു (.kick, .add etc)
+    const body = msg.message.conversation || msg.message.extendedTextMessage?.text || "";
+    const command = body.slice(1).trim().split(/ +/)[0].toLowerCase();
 
-    // 1. ഹെൽപ്പ് മെനു - കമാൻഡുകൾ ഒന്നുമില്ലെങ്കിൽ
-    if (!args[0] || args[0].toLowerCase() === 'help') {
-        const helpText = `*👺⃝⃘̉̉̉━━━━━━━━━━━◆◆◆*
-*✧* 「 *\`👺Asura MD\`* 」
-*╰──────────────❂*
+    // --- 1. Help Menu Design (Same as you requested) ---
+    if (command === 'help' || !command) {
+        const helpText = `
 ╔━━━━━━━━━━━━❥❥❥
 ┃ 🛡️ *👺ULTIMATE GROUP MASTER*
 ┃
-┃🔹🆔️ .group id
-┃🔹➕ .group add [number]
-┃🔹🦶 .group kick [tag/reply]
-┃🔹🤴 .group promot/demote [tag]
-┃🔹🔖 .group tagall [message]
-┃🔹🔐 .group lock/unlock
-┃🔹❌ .group delete [reply]
-┃🔹⏰ .group schedule [min] [text]
-┃🔹🏷 .group name/bio [text]
-┃🔹🥰 .group join [link]
+┃🔹➕ .add [number]
+┃🔹🦶 .kick [tag/reply]
+┃🔹🤴 .promot [tag]
+┃🔹👸 .demote [tag]
+┃🔹🔖 .tagall [message]
+┃🔹🔐 .lock
+┃🔹🔓 .unlock
+┃🔹❌ .delete [reply]
+┃🔹⏰ .schedule [min] [text]
 ┃
-┃✨ *SECURITY CONTROLS:*
-┃🔹🙏 .group welcome on/off
-┃🔹🔗 .group antilink on/off
-┃🔹🚫 .group antidelete on/off
-┃🔹🦠 .group antispam on/off
-┃🔹🌏 .group antiforeign on/off
-┃🔹📞 .group anticall on/off
-┃🔹🤖 .group chatbot on/off
+┃✨ *SECURITY (Logic in Handlers)*
+┃🔹🙏 .welcome on/off
+┃🔹🔗 .antilink on/off
+┃🔹🦠 .antispam on/off
+┃🔹🌏 .antiforeign on/off
 ┃💡 .Help
 ╚━━━━━━━⛥❖⛥━━━━━━❥❥❥`;
-
-        const menuOptions = fs.existsSync(thumbPath) 
-            ? { image: fs.readFileSync(thumbPath), caption: helpText } 
-            : { text: helpText };
-
-        if (fs.existsSync(songPath)) {
-            await sock.sendMessage(chat, { audio: { url: songPath }, mimetype: "audio/ogg; codecs=opus", ptt: true });
-        }
-        return sock.sendMessage(chat, menuOptions, { quoted: msg });
+        
+        return sock.sendMessage(chat, { text: helpText }, { quoted: msg });
     }
 
     try {
-        let targetGroup = chat;
-        let action = args[0].toLowerCase();
-        let valueStartIdx = 1;
-
-        // Remote control logic (JID വെച്ച് ഉപയോഗിക്കുമ്പോൾ)
-        if (args[0].includes('@g.us')) {
-            targetGroup = args[0];
-            action = args[1]?.toLowerCase();
-            valueStartIdx = 2;
-        }
-
-        const value = args.slice(valueStartIdx).join(' ');
         const db = getDB();
+        const value = args[0]?.toLowerCase();
         const quoted = msg.message?.extendedTextMessage?.contextInfo;
         
-        // ടാർഗെറ്റ് യൂസറെ കണ്ടുപിടിക്കുന്നു (Tag, Reply, Number)
-        let user = quoted?.participant || quoted?.mentionedJid?.[0];
-        if (!user && args[valueStartIdx]) {
-            let cleanNum = args[valueStartIdx].replace(/[^0-9]/g, '');
-            if (cleanNum.length > 8) user = cleanNum + '@s.whatsapp.net';
-        }
+        // Target User (Reply, Tag, or Number)
+        let user = quoted?.participant || quoted?.mentionedJid?.[0] || (args[0] ? args[0].replace(/[^0-9]/g, '') + '@s.whatsapp.net' : null);
 
-        switch (action) {
-            case 'id':
-                return sock.sendMessage(chat, { text: `📍 *Chat ID:* ${targetGroup}` }, { quoted: msg });
-
-            // സെക്യൂരിറ്റി കൺട്രോളുകൾ
+        switch (command) {
+            // --- SECURITY CONTROLS (Settings for handlers.js) ---
             case 'welcome':
             case 'antilink':
-            case 'antidelete':
             case 'antispam':
             case 'antiforeign':
-            case 'chatbot':
-                if (!db[targetGroup]) db[targetGroup] = {};
-                db[targetGroup][action] = (value === 'on');
+                if (!db[chat]) db[chat] = {};
+                db[chat][command] = (value === 'on');
                 saveDB(db);
-                return sock.sendMessage(chat, { text: `✅ *${action.toUpperCase()}* is now *${value.toUpperCase()}*` });
+                return sock.sendMessage(chat, { text: `✅ *${command.toUpperCase()}* is now *${value.toUpperCase()}*` });
 
-            case 'anticall':
-                if (!db['global']) db['global'] = {};
-                db['global'].anticall = (value === 'on');
-                saveDB(db);
-                return sock.sendMessage(chat, { text: `🛡️ *ANTI-CALL* is now *${value.toUpperCase()}*` });
-
-            case 'tagall':
-                const metadata = await sock.groupMetadata(targetGroup);
-                let tagMsg = `*📢 Group Tagall*\n\n*Message:* ${value || 'No Message'}\n\n`;
-                const participants = metadata.participants.map(v => v.id);
-                for (let mem of participants) {
-                    tagMsg += `┣ @${mem.split('@')[0]}\n`;
-                }
-                return sock.sendMessage(targetGroup, { text: tagMsg, mentions: participants });
-
+            // --- GROUP ACTIONS ---
             case 'add':
-                if (!user) return sock.sendMessage(chat, { text: "❌ Number ആവശ്യമാണ്!" });
-                await sock.groupParticipantsUpdate(targetGroup, [user], "add");
+                if (!user) return;
+                await sock.groupParticipantsUpdate(chat, [user], "add");
                 break;
 
             case 'kick':
-                if (!user) return sock.sendMessage(chat, { text: "❌ ആളെ ടാഗ് ചെയ്യുകയോ റിപ്ലൈ ചെയ്യുകയോ ചെയ്യുക!" });
-                await sock.groupParticipantsUpdate(targetGroup, [user], "remove");
+                if (!user) return;
+                await sock.groupParticipantsUpdate(chat, [user], "remove");
                 break;
 
             case 'promot':
-                await sock.groupParticipantsUpdate(targetGroup, [user], "promote");
+                if (!user) return;
+                await sock.groupParticipantsUpdate(chat, [user], "promote");
                 break;
 
             case 'demote':
-                await sock.groupParticipantsUpdate(targetGroup, [user], "demote");
+                if (!user) return;
+                await sock.groupParticipantsUpdate(chat, [user], "demote");
                 break;
 
+            case 'tagall':
+                const metadata = await sock.groupMetadata(chat);
+                const participants = metadata.participants.map(p => p.id);
+                let tagMsg = `📢 *Tagall:* ${args.join(' ') || 'Attention!'}\n\n`;
+                for (let mem of participants) {
+                    tagMsg += `┣ @${mem.split('@')[0]}\n`;
+                }
+                return sock.sendMessage(chat, { text: tagMsg, mentions: participants });
+
             case 'lock':
-                await sock.groupSettingUpdate(targetGroup, 'announcement');
+                await sock.groupSettingUpdate(chat, 'announcement');
                 break;
 
             case 'unlock':
-                await sock.groupSettingUpdate(targetGroup, 'not_announcement');
+                await sock.groupSettingUpdate(chat, 'not_announcement');
                 break;
 
             case 'delete':
-                if (!quoted) return sock.sendMessage(chat, { text: "❌ മെസ്സേജിന് റിപ്ലൈ നൽകുക!" });
-                await sock.sendMessage(targetGroup, { delete: { remoteJid: targetGroup, fromMe: false, id: quoted.stanzaId, participant: quoted.participant } });
-                break;
-
-            case 'name':
-                await sock.groupUpdateSubject(targetGroup, value);
-                break;
-
-            case 'bio':
-                await sock.groupUpdateDescription(targetGroup, value);
-                break;
-
-            case 'join':
-                const code = value.split('chat.whatsapp.com/')[1] || value;
-                await sock.groupAcceptInvite(code);
+                if (quoted) {
+                    await sock.sendMessage(chat, { delete: { remoteJid: chat, fromMe: false, id: quoted.stanzaId, participant: quoted.participant } });
+                }
                 break;
 
             case 'schedule':
-                const schedTime = parseInt(args[valueStartIdx]);
-                const schedMsg = args.slice(valueStartIdx + 1).join(' ');
-                sock.sendMessage(chat, { text: `🕒 Scheduled for ${schedTime} min.` });
-                setTimeout(() => { sock.sendMessage(targetGroup, { text: schedMsg }); }, schedTime * 60000);
+                const time = parseInt(args[0]);
+                const sMsg = args.slice(1).join(' ');
+                if (isNaN(time)) return;
+                sock.sendMessage(chat, { text: `🕒 Scheduled in ${time} min.` });
+                setTimeout(() => {
+                    sock.sendMessage(chat, { text: `⏰ *REMINDER:* ${sMsg}` });
+                }, time * 60000);
                 break;
-
-            default:
-                return sock.sendMessage(chat, { text: "❌ Invalid action. Use *.group help*" });
         }
 
-        await sock.sendMessage(chat, { text: `✅ *Executed:* ${action.toUpperCase()}` });
-
     } catch (e) {
-        console.error(e);
-        await sock.sendMessage(chat, { text: "❌ *Error:* ബോട്ടിന് അഡ്മിൻ ഉണ്ടോ എന്ന് നോക്കുക!" });
+        console.error("Group Command Error:", e);
     }
 };
