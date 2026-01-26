@@ -8,50 +8,49 @@ const messageCount = {};
 
 export const handleEvents = async (sock) => {
 
-    // --- 1.(Antilink, Antispam, Antiforeign scan) ---
+    // --- 1. മെസ്സേജ് ഇവന്റുകൾ (Antilink, Antispam, Antiforeign scan) ---
     sock.ev.on('messages.upsert', async (chatUpdate) => {
         try {
             const msg = chatUpdate.messages[0];
             if (!msg.message || msg.key.fromMe) return;
 
             const chat = msg.key.remoteJid;
-            const sender = msg.key.participant || msg.key.remoteJid;
             const isGroup = chat.endsWith('@g.us');
             if (!isGroup) return;
-
+            
+            const sender = msg.key.participant || msg.key.remoteJid;
             const db = getDB();
             const settings = db[chat] || {};
             const body = msg.message.conversation || msg.message.extendedTextMessage?.text || "";
+
             // --- GLOBAL MODE CHECK (Private/Public) ---
             const ownerNumber = sock.user.id.split(':')[0] + "@s.whatsapp.net";
-            const sender = msg.key.participant || msg.key.remoteJid;
             const isOwner = sender === ownerNumber || msg.key.remoteJid === ownerNumber;
-            const db = getDB();
             const botMode = db.botMode || 'public';
  
             if (botMode === 'private' && !isOwner && body.startsWith('.')) {
-         return; 
-        }
+                return; 
+            }
     
-            // --- 1. ALL LINK DELETE 
+            // --- 1. ALL LINK DELETE (WhatsApp link മാത്രമല്ല, എല്ലാ ലിങ്കും) ---
             const linkPattern = /https?:\/\/\S+|www\.\S+|\b\w+\.(?:com|in|net|org|gov|edu|me|xyz|site|co|biz|info|io|ml|tk)\b/gi;
 
             if (settings.antilink && linkPattern.test(body)) {
-            const metadata = await sock.groupMetadata(chat);
-            const isAdmin = metadata.participants.find(p => p.id === sender)?.admin;
+                const metadata = await sock.groupMetadata(chat);
+                const isAdmin = metadata.participants.find(p => p.id === sender)?.admin;
 
-            if (!isAdmin) {
-            // delete message
-                await sock.sendMessage(chat, { delete: msg.key });
-        
-            // Remove from the group
-                await sock.groupParticipantsUpdate(chat, [sender], "remove");
-        
-           // Alert message
-                await sock.sendMessage(chat, { text: "🚫 *Links are strictly prohibited!* User has been removed." });
-                return;
-              }
-          }
+                if (!isAdmin) {
+                    // മെസ്സേജ് ഡിലീറ്റ് ചെയ്യുന്നു
+                    await sock.sendMessage(chat, { delete: msg.key });
+            
+                    // ഗ്രൂപ്പിൽ നിന്ന് നീക്കം ചെയ്യുന്നു
+                    await sock.groupParticipantsUpdate(chat, [sender], "remove");
+            
+                    // അറിയിപ്പ് നൽകുന്നു
+                    await sock.sendMessage(chat, { text: "🚫 *Links are strictly prohibited!* User has been removed." });
+                    return;
+                }
+            }
 
             // --- ANTI-SPAM (തുടർച്ചയായി 3 ഒരേ മെസ്സേജ് വന്നാൽ) ---
             if (settings.antispam) {
