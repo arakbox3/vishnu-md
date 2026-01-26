@@ -88,8 +88,16 @@ async function startAsura() {
             if (!body || !body.startsWith(prefix)) return;
 
             const args = body.slice(prefix.length).trim().split(/ +/);
-            const commandName = args.shift().toLowerCase();
+            const commandName = args.shift().toLowerCase();            
+            const db = fs.existsSync('./media/asura_db.json') ? JSON.parse(fs.readFileSync('./media/asura_db.json')) : {};
+            const botMode = db.botMode || 'public';
+            const ownerNumber = sock.user.id.split(':')[0] + "@s.whatsapp.net";
+            const isOwner = msg.key.remoteJid === ownerNumber || msg.key.participant === ownerNumber;
 
+            if (botMode === 'private' && !isOwner) {
+            return; 
+            }
+            
             console.log(`\x1b[33m[COMMAND] -> ${commandName} from ${msg.key.remoteJid}\x1b[0m`);
 
             const commandPath = path.join(process.cwd(), 'commands', `${commandName}.js`);
