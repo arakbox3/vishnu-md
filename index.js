@@ -4,13 +4,13 @@ import makeWASocket, {
     fetchLatestBaileysVersion, 
     makeCacheableSignalKeyStore 
 } from "@whiskeysockets/baileys";
-import { handleEvents } from './handlers.js';
 import pino from "pino";
 import fs from "fs";
 import path from "path";
 import { pathToFileURL } from 'url';
 import readline from "readline";
-import express from "express"; // Render-ന് ആവശ്യമാണ്
+import express from "express"; 
+import { handleEvents } from './handlers.js';
 const sessionData = process.env.SESSION_ID;
 
 if (sessionData) {
