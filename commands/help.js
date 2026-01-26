@@ -103,8 +103,7 @@ export default async (sock, msg, args) => {
 ┃ ⊙🌏 .antiforeign on/off — Block foreign numbers
 ┃ ⊙📷 .Image <name> – Search and save photos.
 ​┃ ⊙🎤 .Voice <text> – Convert text to audio.
-​┃ ⊙👁 .View – Send media that opens once
-​┃ ⊙👥 .Group – Manage group settings
+​┃ ⊙👁 .View – Send media that opens once.
 ┃ ⊙💳 .Pay — Donate
 ┃ ⊙📳 .Mode - Public or Private mode 
 ​┃ ⊙📓 .Help – View commands
