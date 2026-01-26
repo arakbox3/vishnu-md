@@ -74,27 +74,40 @@ export default async (sock, msg, args) => {
 ╔━━━━━━━━━━❥❥❥
 ┃ °☆°☆°☆°☆°☆°☆°☆°☆°
 ╠━━━━⛥❖⛥━━━❥❥❥
-┃ ⊙📡.Ping–Check bot speed.
-┃ ⊙🔋.Alive–Check if bot is online.
-┃ ⊙📜 .Menu–See all commands.
-┃ ⊙🎵 .Song <name>–save audio/MP3.
-┃ ⊙🎬 .Video <name>–save video/MP4.
-┃ ⊙🔊 .Audio <name>–save audio/MP3.
-┃ ⊙🖼️ .Sticker–Turn image/video/gif into a sticker.
-┃ ⊙🎲 .Game–Play built-in games.
-┃ ⊙🎭 .Fun–Jokes and fun activities.
-┃ ⊙🤖 .Ai-Mini ChatBot 
-┃ ⊙🆎️ .Font <text>–Change text to stylish fonts.
-┃ ⊙👤 .Owner–Get creator's info.
-┃ ⊙🤯 .Play–built-in games.
+┃ ⊙📡 .Ping – Check bot speed.
+┃ ⊙🔋 .Alive – Check if bot is online.
+┃ ⊙📜 .Menu – See all commands.
+┃ ⊙🎵 .Song <name> – save audio/MP3.
+┃ ⊙🎬 .Video <name> – save video/MP4.
+┃ ⊙🔊 .Audio <name> – save audio/MP3.
+┃ ⊙🖼️ .Sticker – Turn image/video/gif into a sticker.
+┃ ⊙🎲 .Game–Play built - in games.
+┃ ⊙🎭 .Fun – Jokes and fun activities.
+┃ ⊙🤖 .Ai - Mini ChatBot 
+┃ ⊙🆎️ .Font <text> – Change text to stylish fonts.
+┃ ⊙👤 .Owner – Get creator's info.
+┃ ⊙🤯 .Play – built-in games.
 ┃ ⊙📢 .Tagall–Mention all group members.
-┃ ⊙📷 .Image <name>–Search and save photos.
-​┃ ⊙🎤 .Voice <text>–Convert text to audio.
-​┃ ⊙👁 .View–Send media that opens once
-​┃ ⊙👥 .Group–Manage group settings
-┃ ⊙💳 .Pay—Donate
-┃ ⊙📳 .Mode-Public or Private mode 
-​┃ ⊙📓 .Help–View commands
+┃ ⊙➕ .add [number] — Add member to group
+┃ ⊙🦶 .kick-group — Remove member from group
+┃ ⊙🤴 .promot [tag] — Make member admin
+┃ ⊙👸 .demote [tag] — Remove admin role
+┃ ⊙🔖 .tagall [message] — Mention all members
+┃ ⊙🔐 .lock — Lock group (admins only)
+┃ ⊙🔓 .unlock — Unlock group (everyone can chat)
+┃ ⊙❌ .delete [reply] — Delete replied message
+┃ ⊙⏰ .schedule [min] [text] — Send message after time
+┃ ⊙🙏 .welcome on/off — Welcome message toggle
+┃ ⊙🔗 .antilink on/off — Block links in group
+┃ ⊙🦠 .antispam on/off — Stop spam messages
+┃ ⊙🌏 .antiforeign on/off — Block foreign numbers
+┃ ⊙📷 .Image <name> – Search and save photos.
+​┃ ⊙🎤 .Voice <text> – Convert text to audio.
+​┃ ⊙👁 .View – Send media that opens once
+​┃ ⊙👥 .Group – Manage group settings
+┃ ⊙💳 .Pay — Donate
+┃ ⊙📳 .Mode - Public or Private mode 
+​┃ ⊙📓 .Help – View commands
 ╚━━━⛥❖⛥━━━❥❥❥
 ┃ °☆°☆°☆°☆°☆°☆°☆°☆°
 ╠━━━━⛥❖⛥━━━❥❥❥
