@@ -94,6 +94,7 @@ export default async (sock, msg, args) => {
 ┃ ⊙👁   .View 
 ┃ ⊙👥   .Group 
 ┃ ⊙💳   .Pay
+┃ ⊙📳   .Mode 
 ┃ ⊙📓   .Help
 ╚━━━⛥❖⛥━━━❥❥❥
 ┃ °☆°☆°☆°☆°☆°☆°☆°☆°
