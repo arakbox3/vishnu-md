@@ -8,7 +8,7 @@ const saveDB = (data) => fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2)
 export default async (sock, msg, args) => {
     const chat = msg.key.remoteJid;
     const command = args[0]?.toLowerCase();
-    const imagePath = './media/asura.jpg';
+    const imagePath = './media/thumb.jpg';
     const songPath = './media/song.opus';
 
     // --- 1. Help Menu Design (Updated with all commands) ---
@@ -23,25 +23,25 @@ export default async (sock, msg, args) => {
 ╔━━━━━━━━━━━━❥❥❥
 ┃ 🛡️ *👺ULTIMATE GROUP MASTER*
 ┃
-┃🔹 .group id (Get Chat ID)
-┃🔹 .group add [number]
-┃🔹 .group kick [tag/reply]
-┃🔹 .group promot/demote [tag]
-┃🔹 .group tagall [message]
-┃🔹 .group lock/unlock
-┃🔹 .group delete [reply]
-┃🔹 .group schedule [min] [text]
-┃🔹 .group name/bio [text]
-┃🔹 .group join [link]
+┃🔹🆔️ .group id (Get Chat ID)
+┃🔹➕ .group add [number]
+┃🔹🦶 .group kick [tag/reply]
+┃🔹🤴 .group promot/demote [tag]
+┃🔹🔖 .group tagall [message]
+┃🔹🔐 .group lock/unlock
+┃🔹❌ .group delete [reply]
+┃🔹⏰ .group schedule [min] [text]
+┃🔹🏷 .group name/bio [text]
+┃🔹🥰 .group join [link]
 ┃
 ┃✨ *SECURITY CONTROLS:*
-┃🔹 .group welcome on/off
-┃🔹 .group antilink on/off
-┃🔹 .group antidelete on/off
-┃🔹 .group antispam on/off
-┃🔹 .group antiforeign on/off
-┃🔹 .group anticall on/off
-┃🔹 .group chatbot on/off
+┃🔹🙏 .group welcome on/off
+┃🔹🔗 .group antilink on/off
+┃🔹🚫 .group antidelete on/off
+┃🔹🦠 .group antispam on/off
+┃🔹🌏 .group antiforeign on/off
+┃🔹📞 .group anticall on/off
+┃🔹🤖 .group chatbot on/off
 ┃💡 .Help
 ╚━━━━━━━⛥❖⛥━━━━━━❥❥❥`;
 
