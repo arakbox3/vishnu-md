@@ -70,7 +70,31 @@ export default async (sock, msg, args) => {
     //  Parenthesized (Letters in brackets)
     parenthesis: "⒜⒝⒞⒟⒠⒡⒢⒣⒤⒥⒦⒧⒨⒩⒪⒫⒬⒭⒮⒯⒰⒱⒲⒳⒴⒵",
 
-        // ... മറ്റുള്ളവയും ഇതുപോലെ ചേർക്കാം
+    //latter Emoji 
+    emoji: "🍎🐻🐮🥟🥚🔥👧🖐🧊🗾🪁😂📫💅🦦💩❓🌹🧼🐢⬆️🏐💦❌🧶🦓",
+
+    OrnateParentheses: " ﴾Ä̤﴿﴾B̤̈﴿﴾C̤̈﴿﴾D̤̈﴿﴾Ë̤﴿﴾F̤̈﴿﴾G̤̈﴿﴾Ḧ̤﴿﴾Ï̤﴿﴾J̤̈﴿﴾K̤̈﴿﴾L̤̈﴿﴾M̤̈﴿﴾N̤̈﴿﴾Ö̤﴿﴾P̤̈﴿﴾Q̤̈﴿﴾R̤̈﴿﴾S̤̈﴿﴾T̤̈﴿﴾Ṳ̈﴿﴾V̤̈﴿﴾Ẅ̤﴿﴾Ẍ̤﴿﴾Ÿ̤﴿﴾Z̤̈﴿",
+
+    Shade:  " A░B░C░D░E░F░G░H░I░J░K░L░M░N░O░P░Q░R░S░T░U░V░W░X░Y░Z░",
+
+   Brackets:  "【A】【B】【C】【D】【E】【F】【G】【H】【I】【J】【K】【L】【M】【N】【O】【P】【Q】【R】【S】【T】【U】【V】【W】【X】【Y】【Z】",
+
+   Money:  "₳฿₵ĐɆ₣₲ⱧłJ₭Ⱡ₥₦Ø₱QⱤ₴₮ɄV₩ӾɎⱫ",
+
+   DottedAngleBrackets:  "⦑A⦒⦑B⦒⦑C⦒⦑D⦒⦑E⦒⦑F⦒⦑G⦒⦑H⦒⦑I⦒⦑J⦒⦑K⦒⦑L⦒⦑M⦒⦑N⦒⦑O⦒⦑P⦒⦑Q⦒⦑R⦒⦑S⦒⦑T⦒⦑U⦒⦑V⦒⦑W⦒⦑X⦒⦑Y⦒⦑Z⦒",
+
+   X's: "A͓̽B͓̽C͓̽D͓̽E͓̽F͓̽G͓̽H͓̽I͓̽J͓̽K͓̽L͓̽M͓̽N͓̽O͓̽P͓̽Q͓̽R͓̽S͓̽T͓̽U͓̽V͓̽W͓̽X͓̽Y͓̽Z͓̽",
+
+̾   Lightning: "A͛B͛C͛D͛E͛F͛G͛H͛I͛J͛K͛L͛M͛N͛O͛P͛Q͛R͛S͛T͛U͛V͛W͛X͛Y͛Z͛",
+
+   Zigzags: "A͛⦚B͛⦚C͛⦚D͛⦚E͛⦚F͛⦚G͛⦚H͛⦚I͛⦚J͛⦚K͛⦚L͛⦚M͛⦚N͛⦚O͛⦚P͛⦚Q͛⦚R͛⦚S͛⦚T͛⦚U͛⦚V͛⦚W͛⦚X͛⦚Y͛⦚Z͛⦚",
+
+   UpArrows: "A͎B͎C͎D͎E͎F͎G͎H͎I͎J͎K͎L͎M͎N͎O͎P͎Q͎R͎S͎T͎U͎V͎W͎X͎Y͎Z͎",
+
+   VerticalBrackets:  "A̺͆B̺͆C̺͆D̺͆E̺͆F̺͆G̺͆H̺͆I̺͆J̺͆K̺͆L̺͆M̺͆N̺͆O̺͆P̺͆Q̺͆R̺͆S̺͆T̺͆U̺͆V̺͆W̺͆X̺͆Y̺͆Z̺͆",
+
+   Tildes:  "A≋B≋C≋D≋E≋F≋G≋H≋I≋J≋K≋L≋M≋N≋O≋P≋Q≋R≋S≋T≋U≋V≋W≋X≋Y≋Z≋",
+
     };
 
     const numMaps = {
