@@ -88,24 +88,10 @@ export default async (sock, msg, args) => {
 ┃ ⊙🆎️   .Font <text>
 ┃ ⊙👤   .Owner
 ┃ ⊙🤯   .Play
-┃ ⊙➕   .add 
-┃ ⊙🦶   .kick
-┃ ⊙🤴   .promot 
-┃ ⊙👸   .demote 
-┃ ⊙🔐   .lock 
-┃ ⊙🔓   .unlock 
-┃ ⊙❌   .delete
-┃ ⊙⏰   .schedule 
-┃ ⊙🙏   .welcome on/off
-┃ ⊙🔗   .antilink on/off 
-┃ ⊙🦠   .antispam on/off 
-┃ ⊙🌏   .antiforeign on/off
-┃ ⊙📢   .Tagall
 ┃ ⊙📷   .Image <name> 
 ​┃ ⊙🎤   .Voice <text>
 ┃ ⊙👁   .View  
-┃ ⊙💳   .Pay
-┃ ⊙📳   .Mode private/public 
+┃ ⊙🩸   .Donate 
 ┃ ⊙📓   .Help
 ╚━━━⛥❖⛥━━━❥❥❥
 ┃ °☆°☆°☆°☆°☆°☆°☆°☆°
