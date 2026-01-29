@@ -11,9 +11,9 @@ export default async (sock, msg, args) => {
         const { key } = await sock.sendMessage(chat, { text: "🚀 Connecting to Asura Server..." });
 
         const frames = [
-            "📶 Testing Latency...",
-            "📡 Network: Stable",
-            "👺 Asura MD Engine Ready!"
+            "📶 Tᴇsᴛɪɴɢ Lᴀᴛᴇɴᴄʏ...",
+            "📡 Nᴇᴛᴡᴏʀᴋ: Sᴛᴀʙʟᴇ",
+            "👺 Asᴜʀᴀ MD Eɴɢɪɴᴇ Rᴇᴀᴅʏ!"
         ];
 
         for (let frame of frames) {
