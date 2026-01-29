@@ -28,8 +28,11 @@ export default async (sock, msg, args) => {
 *╰───────────❂*
 ╭•°•❲ *Streaming...* ❳•°•
  ⊙🎬 *TITLE:* ${video.title}
+╰━━━━━━━━━━━━━━┈⊷
  ⊙📺 *CHANNEL:* ${video.author.name}
+╰━━━━━━━━━━━━━━┈⊷
  ⊙⏳ *DURATION:* ${video.timestamp}
+╰━━━━━━━━━━━━━━┈⊷
 *◀︎ •၊၊||၊||||။‌‌‌‌၊||••*
 ╰╌╌╌╌╌╌╌╌╌╌࿐
 ╔━━━━━━━━━━━❥❥❥
