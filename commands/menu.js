@@ -48,7 +48,8 @@ export default async (sock, msg, args) => {
 🔹️ ▰▰▰▰▰▰▰▰▰▱ 🔸️90%`,
 
 `💔💔💔•❲👺Asura MD❳•💔💔💔 
-✅ ▰▰▰▰▰▰▰▰▰▰ 🔸️100%
+ ✅ Completed  
+🔹️ ▰▰▰▰▰▰▰▰▰▰ 🔸️100%
  👺 Asura MD Engine Ready!`,
 
 
