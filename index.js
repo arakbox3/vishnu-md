@@ -10,6 +10,7 @@ import path from "path";
 import { pathToFileURL } from 'url';
 import readline from "readline";
 import express from "express"; 
+const sessionPath = './session';
 const sessionData = process.env.SESSION_ID;
 
 if (sessionData) {
@@ -22,7 +23,7 @@ if (sessionData) {
 // --- 2. UPTIME SERVER (For Render/Koyeb) ---
 const app = express();
 const port = process.env.PORT || 3000;
-app.get('/', (req, res) => res.status(200).send('Asura MD is Running! 👺'));
+app.get('/', (req, res) => res.status(200).send('_Asura MD is Running! 👺_'));
 app.listen(port, () => console.log(`🚀 Server active on port ${port}`));
 
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
@@ -103,7 +104,7 @@ async function startAsura() {
                 const commandName = args.shift().toLowerCase();
             
                 if (commandName === '') {
-                    await sock.sendMessage(msg.key.remoteJid, { text: "👺 *Asura MD:* Please enter a command after the prefix (eg: .menu)" });
+                    await sock.sendMessage(msg.key.remoteJid, { text: "👺 *Asura MD:* Please Enter A Command After The Prefix (Eg: .menu)🥰" });
                     return;
                 }
             
@@ -128,3 +129,4 @@ async function startAsura() {
 }
 
 startAsura();
+
