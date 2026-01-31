@@ -45,7 +45,7 @@ export default async (sock, msg, args) => {
 ╰━━━━━━━━━━━━━━┈⊷
  ⊙🔋 *IQ LEVEL:* -999%
 ╰━━━━━━━━━━━━━━┈⊷
-*◀︎ •၊၊||၊||||။‌၊||••*
+*⊙👨‍💻Developer: arun•°Cumar*
 ╰╌╌╌╌╌╌╌╌╌╌࿐
 ╔━━━━━━━━━━━❥❥❥
 ┃👺 *Roast Activated for:* ${pushName}
