@@ -5,45 +5,52 @@ export default async (sock, msg, args) => {
     const amount = args[0] || "10";
     const myUpi = "08arun7@upi"; 
     const name = "Asura MD Support";
-    const thumbPath = './media/asura.jpg'; 
+    const thumbPath = './media/thumb.jpg'; 
 
-    // UPI Link
+    // UPI Link & QR API
     const payUrl = `upi://pay?pa=${myUpi}&pn=${encodeURIComponent(name)}&am=${amount}&cu=INR`;
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=512x512&data=${encodeURIComponent(payUrl)}`;
 
     try {
-        await sock.sendMessage(from, { react: { text: "🏦", key: msg.key } });
+        await sock.sendMessage(from, { react: { text: "💳", key: msg.key } });
 
         const donateText = `
-*🏦 Whatsapp Bank OFFICIAL NOTIFICATION*
+*─『 💳 QUICK CHECKOUT 』─*
 
-*Transaction ID:* ${Math.floor(Math.random() * 1000000000)}
-*Status:* PENDING REQUEST
+*Hello,* @${msg.pushName || 'User'}
+*Support the development of Asura MD.*
 
-Hello User,
-Your support keeps *Asura MD* alive. Please complete the donation of *₹${amount}* to help us maintain our servers.
-
-*DETAILS:*
-⊙ *Receiver:* ${name}
-⊙ *UPI ID:* ${myUpi}
+*PAYMENT SUMMARY*
+━━━━━━━━━━━━━━━━━
+⊙ *Payee:* ${name}
 ⊙ *Amount:* ₹${amount}.00
+⊙ *Status:* Pending
+━━━━━━━━━━━━━━━━━
 
-_Click the button below to complete the payment via any UPI app (GPay, PhonePe, Paytm)._
+*HOW TO PAY?*
+1. *Click the Card:* Tap the banner above to pay via GPay/PhonePe/Paytm.
+2. *Scan QR:* Use the QR code attached for manual scanning.
+3. *Manual:* Copy UPI ID: \`${myUpi}\`
 
-> 🛡️ 100% Secure Transaction via NPCI.`;
+> 🛡️ _Encrypted & Secure Transaction_
+*© ᴀsᴜʀᴀ ᴍᴅ | ᴀʀᴜɴ*`;
 
-        let buffer = fs.existsSync(thumbPath) ? fs.readFileSync(thumbPath) : Buffer.alloc(0);
+        // Thumbnail ഫയൽ ചെക്ക് ചെയ്യുന്നു
+        let buffer = fs.existsSync(thumbPath) ? fs.readFileSync(thumbPath) : { url: qrUrl };
 
         await sock.sendMessage(from, {
-            text: donateText,
+            image: { url: qrUrl },
+            caption: donateText,
             contextInfo: {
+                mentionedJid: [msg.sender],
                 externalAdReply: {
-                    title: `PAY ₹${amount}.00 NOW`,
-                    body: "Click here to complete your donation 💳",
-                    thumbnail: buffer,
+                    title: `PAY ₹${amount}.00 NOW ⚡`,
+                    body: "Tap here to complete your payment",
+                    thumbnail: fs.existsSync(thumbPath) ? fs.readFileSync(thumbPath) : null, 
                     sourceUrl: payUrl, 
                     mediaType: 1,
                     renderLargerThumbnail: true,
-                    mediaUrl: payUrl 
+                    showAdAttribution: false 
                 }
             }
         }, { quoted: msg });
