@@ -79,7 +79,7 @@ async function startAsura() {
     } else if (connection === 'open') {
         console.log('\x1b[36m✅ Asura MD Connected!\x1b[0m');
         const myId = sock.user.id.split(':')[0] + "@s.whatsapp.net";
-        await sock.sendMessage(myId, { text: "👺 *Asura MD is Online!*" });
+        await sock.sendMessage(myId, { text: "👺 *ASURA-MD is Online!*" });
     }
 });
 
@@ -96,7 +96,7 @@ async function startAsura() {
                          (mtype === 'videoMessage') ? msg.message.videoMessage.caption : '';
             
             // --- PREFIX CHECK ---
-                const prefixRegex = /^[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~₹£€÷×+`]/;
+                const prefixRegex = "!@#$%^&*()_+-=[]{};':\"\\|,.<>/?~₹£€÷×+`".split("");
                 const isCmd = prefixRegex.test(body);
                 if (!isCmd) return;
 
