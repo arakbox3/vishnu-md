@@ -9,11 +9,18 @@ const runtime = async (sock, msg, args) => {
     const secs = Math.floor(uptime % 60);
 
     const uptimeString = `
+    *👺⃝⃘̉̉̉━━━━━━━━━◆◆◆◆◆*
+*┊ ┊ ┊ ┊ ┊*
+*┊ ┊ ✫ ˚㋛ ⋆｡ ❀*
+*┊ ☪︎⋆*
+*⊹* 🪔 *ᴡʜᴀᴛꜱᴀᴘᴘ ᴍɪɴɪ ʙᴏᴛ*
+*✧* 「 👺Asura MD 」
+*╰────────────❂*
 ╭━━━〔 **ASURA MD** 〕━━┈⊷
-┃ 👤 **Owner:** Asura
-┃ 👺 **Bot:** Asura MD
-┃ ⏳ **Uptime:** ${days}d ${hours}h ${mins}m ${secs}s
-┃ ⚙️ **Status:** Active
+┃ 👤 *Owner:* Asura
+┃ 👺 *Bot:* Asura MD
+┃ ⏳ *Uptime:* ${days}d ${hours}h ${mins}m ${secs}s
+┃ ⚙️ *Status:* Active
 ╰━━━━━━━━━━━━━━━┈⊷`.trim();
 
     // --- MEDIA PATHS ---
