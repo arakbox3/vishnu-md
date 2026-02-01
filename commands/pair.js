@@ -62,6 +62,7 @@ export default async (sock, msg, args) => {
 2. Go to 'Linked Devices' 👉 'Link a Device'.
 3. Select 'Link with phone number instead'.
 4. Tap and copy the code above and paste it.
+> 📢 Join our channel: https://whatsapp.com/channel/0029VbB59W9GehENxhoI5l24
 > *© Pᴏᴡᴇʀᴇᴅ Bʏ 👺 ASURA-MD ♡*`;
 
             await sock.sendMessage(chat, { text: responseText }, { quoted: msg });
