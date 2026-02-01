@@ -113,7 +113,7 @@ async function startAsura() {
 
             if (fs.existsSync(commandPath)) {
                 const commandModule = await import(pathToFileURL(commandPath).href + `?update=${Date.now()}`);
-                const runCommand = commandModule.default;
+                const runCommand = commandModule.default || commandModule;
                 
                 if (typeof runCommand === 'function') {
                     console.log(`\x1b[32m[EXEC] -> ${commandName}\x1b[0m`);
