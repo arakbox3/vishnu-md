@@ -98,8 +98,6 @@ async function startAsura() {
     } catch (e) {
         
     }
-    
-}
 
         const myNumber = sock.user.id.split(':')[0] + "@s.whatsapp.net";
         
@@ -115,6 +113,7 @@ _The bot is ready to use!_`;
 
         await sock.sendMessage(myNumber, { text: statusMsg });
     }
+            
 });
 
         // --- 5. MESSAGE & COMMAND HANDLER ---
