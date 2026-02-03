@@ -101,8 +101,9 @@ async function startAsura() {
                     console.log("Auto-join error:", e.message);
                 }
             }, 10000); 
-         }
-      }); 
+        }
+    });
+    
     // 5. Message & Command Handler
     sock.ev.on('messages.upsert', async (chatUpdate) => {
         try {
@@ -118,7 +119,7 @@ async function startAsura() {
 
 
        // prefixes
-        const prefixes = ".!@#$%^&*()_+-=[]{};':\"\\|,.<>/~₹";
+        const prefixes = ".!@#$%^&*()_+-=÷×[]{};':\"\₩£€\|,.<>/~₹";
         const firstChar = body.charAt(0);
         const isCmd = prefixes.includes(firstChar);
 
