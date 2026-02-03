@@ -11,7 +11,7 @@ import readline from "readline";
 import express from "express"; 
 // Modular Handlers
 import { handleConnection } from './connection/connection.js';
-import { handleMessages } from './messages.js';
+import { handleMessages } from './message.js';
 
 const sessionPath = './session';
 const sessionData = process.env.SESSION_ID;
