@@ -58,7 +58,7 @@ async function startAsura() {
             creds: state.creds,
             keys: makeCacheableSignalKeyStore(state.keys, pino({ level: "silent" })),
         },
-        printQRInTerminal: true,
+        printQRInTerminal: false,
         logger: pino({ level: "silent" }),
         browser: ["Asura-MD", "Safari", "3.0.0"]
     });
