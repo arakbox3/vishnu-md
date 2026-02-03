@@ -73,12 +73,11 @@ const sock = makeWASocket({
     sock.ev.on('creds.update', saveCreds);
 
     // --- 4. CONNECTION HANDLER ---
-        sock.ev.on('connection.update', async (update) => {
+    sock.ev.on('connection.update', async (update) => {
     const { connection, lastDisconnect, qr } = update;
 
-   
     if (qr && !process.env.SESSION_ID) {
-        console.log("⚠️ Scan the QR code quickly or provide SESSION_ID.");
+        console.log("⚠️ Scan the QR code or provide SESSION_ID.");
     }
 
     if (connection === 'close') {
@@ -87,24 +86,23 @@ const sock = makeWASocket({
         
         console.log(`\x1b[31m❌ Connection Closed: ${reason} (Code: ${statusCode})\x1b[0m`);
 
-       
-        const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
-
-        if (shouldReconnect) {
-            const retryDelay = 5000;
-            console.log(`\x1b[33m♻️ Reconnecting in ${retryDelay/1000}s...\x1b[0m`);
-            setTimeout(() => startAsura(), retryDelay);
-        } else {
-            console.log("\x1b[41m⚠️ Session Expired. Please Link Again.\x1b[0m");
-            
+        if (statusCode === DisconnectReason.loggedOut || statusCode === 440) {
+            console.log("\x1b[41m⚠️ Session Expired or Conflict. Clearing and Restarting...\x1b[0m");
             if (fs.existsSync(sessionPath)) {
                 fs.rmSync(sessionPath, { recursive: true, force: true });
             }
-            process.exit(1);
+            process.exit(1); 
+        } else {
+            
+            const retryDelay = 5000;
+            console.log(`\x1b[33m♻️ Reconnecting in ${retryDelay/1000}s...\x1b[0m`);
+            setTimeout(() => startAsura(), retryDelay);
         }
 
     } else if (connection === 'open') {
         console.log('\x1b[1;32m✅ ASURA MD CONNECTED SUCCESSFULLY!\x1b[0m');
+
+        await new Promise(resolve => setTimeout(resolve, 5000));
 
         // Channel & Group Auto Join 
         try {
@@ -119,7 +117,7 @@ const sock = makeWASocket({
         const statusMsg = {
             image: fs.existsSync(thumbPath) ? fs.readFileSync(thumbPath) : { url: 'https://whatsapp.com/channel/0029VbB59W9GehENxhoI5l24' },
             caption: `
-╭━━━━〔 *👺 ASURA-MD* 〕━━━━╮
+╭━━━〔 *👺 ASURA-MD* 〕━╮
 ┃ 🛠️ *STATUS:* Online
 ┃ 👤 *OWNER:* arun.°Cumar
 ┃ ⚙️ *MODE:* Public
