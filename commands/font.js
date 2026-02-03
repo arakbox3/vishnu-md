@@ -7,7 +7,7 @@ export default async (sock, msg, args) => {
     if (!text) return await sock.sendMessage(chat, { text: "👺 *Please provide text!* \nExample: `.font Asura`" }, { quoted: msg });
 
     const charMaps = {
-        "Double Struck": {
+               "Double Struck": {
             c: "𝔸𝔹ℂ𝔻𝔼𝔽𝔾ℍ𝕀𝕁𝕂𝕃𝕄ℕ𝕆ℙℚℝ𝕊𝕋𝕌𝕍𝕎𝕏𝕐ℤ𝕒𝕓𝕔𝕕𝕖𝕗𝕘𝕙𝕚𝕛𝕜𝕝𝕞𝕟𝕠𝕡𝕢𝕣𝕤𝕥𝕦𝕧𝕨𝕩𝕪𝕫",
             n: "𝟘𝟙𝟚𝟛𝟜𝟝𝟞𝟟𝟠𝟡" 
         },
@@ -49,14 +49,14 @@ export default async (sock, msg, args) => {
         },
         "Square Box": {
             c: "🄰🄱🄲🄳🄴🄵🄶🄷🄸🄹🄺🄻🄼🄽🄾🄿🅀🅁🅂🅃🅄🅅🅆🅇🅈🅉🄰🄱🄲🄳🄴🄵🄶🄷🄸🄹🄺🄻🄼🄽🄾🄿🅀🅁🅂🅃🅄🅅🅆🅇🅈🅉",
-            n: "⓪①②③④⑤⑥⑦⑧⑨" 
-     };
+            n: "⓪①②③④⑤⑥⑦⑧⑨"  }
+    };
 
     const normalChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
     const normalNums = "0123456789";
 
-    const buttons = [];
-    
+    let responseText = `👺 *ASURA FONT GENERATOR*\n\n*Input:* ${text}\n\n`;
+
     Object.keys(charMaps).forEach((key) => {
         const map = charMaps[key];
         const styled = text.split('').map(char => {
@@ -67,33 +67,15 @@ export default async (sock, msg, args) => {
             return char;
         }).join('');
 
-        // copy button separately 
-        buttons.push({
-            "name": "cta_copy",
-            "buttonParamsJson": JSON.stringify({
-                "display_text": `Copy ${key}`,
-                "copy_code": styled
-            })
-        });
+        // ഓരോ ഫോണ്ടിന്റെയും പേരും അതിന്റെ റിസൾട്ടും ചേർക്കുന്നു
+        responseText += `*${key}:*\n\`\`\`${styled}\`\`\`\n\n`;
     });
 
-    const fontMsg = {
-        viewOnceMessage: {
-            message: {
-                interactiveMessage: {
-                    header: { title: "👺 *ASURA FONT GENERATOR*" },
-                    body: { text: `*Input:* ${text}\n\nSelect a style below to copy it directly to your clipboard.` },
-                    footer: { text: "© ᴀsᴜʀᴀ ᴍᴅ | ᴀʀᴜɴ" },
-                    nativeFlowMessage: {
-                        buttons: buttons
-                    }
-                }
-            }
-        }
-    };
+    responseText += `_© ᴀsᴜʀᴀ ᴍᴅ | ᴀʀᴜɴ_`;
 
     try {
-        await sock.relayMessage(chat, fontMsg, {});
+        // ലളിതമായ ടെക്സ്റ്റ് മെസ്സേജ് അയക്കുന്നു (ഇത് എല്ലായിടത്തും വർക്ക് ആകും)
+        await sock.sendMessage(chat, { text: responseText }, { quoted: msg });
         
         const songPath = './media/song.opus';
         if (fs.existsSync(songPath)) {
@@ -103,4 +85,3 @@ export default async (sock, msg, args) => {
         console.error("Font Error:", e);
     }
 };
-
