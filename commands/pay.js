@@ -1,83 +1,68 @@
 import fs from "fs";
-import path from "path";
 
 export default async (sock, msg, args) => {
     const from = msg.key.remoteJid;
     const sender = msg.sender;
     const amount = args[0] || "10";
     const myUpi = "08arun7@upi";
-    const name = "arun•°Cumar";
+    const name = "Arun Cumar";
+    const transactionID = `ASURA-${Math.random().toString(36).toUpperCase().substring(2, 10)}`;
     
     const thumbPath = './media/thumb.jpg';
-    const audioPath = './media/song.opus';
 
     try {
-        // 1. Send Reaction
+        // Professional Reaction
         await sock.sendMessage(from, { react: { text: "💰", key: msg.key } });
 
-        // 2. Modern Professional Text Design (Standard Markdown)
         const donateText = `
-👺⃝⃘̉̉̉━━━━━━━━━◆◆◆◆◆*
-*┊ ┊ ┊ ┊ ┊*
-*┊ ┊ ✫ ˚㋛ ⋆｡ ❀*
-*┊ ☪︎⋆*
-*⊹* 🪔 *ᴡʜᴀᴛꜱᴀᴘᴘ ᴍɪɴɪ ʙᴏᴛ*
-*✧* 「 \`👺Asura MD\` 」
-*╰─────────────────❂*
-*───「 ASURA-MD SUPPORT 」───*
+*〔 ASURA-MD INFRASTRUCTURE 〕*
 
-*👋🏻 Hello,* @${sender.split('@')[0]}
+*SYSTEM STATUS:* 🟢 Operational
+*REQUEST TYPE:* Donation / Maintenance Support
+*REFERENCE:* \`${transactionID}\`
 
-🔸️ If you appreciate this project, consider supporting its maintenance with a small donation.
+Hello @${sender.split('@')[0]},
+To maintain our high-speed servers and keep development free, consider a contribution.
 
-*🔑 ID:* #${Math.floor(1000 + Math.random() * 9000)}
-*📜 STATUS:* Pending Verification ✅
+*─── PAYMENT GATEWAY ───*
 
-*『 PAYMENT DETAILS 』*
-━━━━━━━━━━━━━━━━
-⊙ *🤑 Paye:* ${name}
-⊙ *🪙 Amount:* INR ${amount}.00
-⊙ *💳 UPI ID:* \`${myUpi}\`
-━━━━━━━━━━━━━━━━
+┌── 👤 *RECIPIENT*
+│ Name: ${name}
+└── UPI: \`${myUpi}\`
 
-*🔗 QUICK PAYMENT LINK:*
-https://pay.upilink.in/pay/${myUpi}?am=${amount}
+┌── 💰 *BILLING*
+│ Amount: ₹${amount}.00
+└── Currency: INR
 
-> Please share the screenshot after successful payment. Thank you for your support! 👺
+*─── QUICK ACTIONS ───*
 
-*© ASURA MD | arun•°Cumar*`;
+🔗 *DIRECT PAY:*
+https://pay.upilink.in/pay/${myUpi}?am=${amount}&pn=${encodeURIComponent(name)}
 
-        // 3. Send Voice Note (Optional Professional Touch)
-        if (fs.existsSync(audioPath)) {
-            await sock.sendMessage(from, { 
-                audio: fs.readFileSync(audioPath), 
-                mimetype: 'audio/ogg; codecs=opus', 
-                ptt: true 
-            }, { quoted: msg });
-        }
+> *Instructions:* Click the link above to pay via any UPI app. Please forward the transaction receipt for our records.
 
-        // 4. Send Main Message with Image (High Compatibility Mode)
+*© ASURA MD*`;
+
         await sock.sendMessage(from, {
             image: fs.existsSync(thumbPath) ? fs.readFileSync(thumbPath) : { url: 'https://files.catbox.moe/9e4b39.jpg' },
             caption: donateText,
             mentions: [sender],
             contextInfo: {
-                // This part provides the "link preview" look but doesn't break the message if it fails
                 externalAdReply: {
-                    title: "ASURA MD - SECURE PAYMENT",
-                    body: "Support the development",
-                    thumbnail: fs.existsSync(thumbPath) ? fs.readFileSync(thumbPath) : null,
-                    sourceUrl: "https://whatsapp.com/channel/0029VbB59W9GehENxhoI5l24",
+                    title: "ASURA-MD PREMIUM SUPPORT",
+                    body: "Support Open Source Development",
                     mediaType: 1,
+                    previewType: "PHOTO",
+                    thumbnailUrl: 'https://files.catbox.moe/9e4b39.jpg', 
+                    sourceUrl: "https://whatsapp.com/channel/0029VbB59W9GehENxhoI5l24",
                     showAdAttribution: false,
-                    renderLargerThumbnail: true
+                    renderLargerThumbnail: false 
                 }
             }
         }, { quoted: msg });
 
     } catch (e) {
-        console.error('Donate Command Error:', e);
-        // Fallback to simple text if everything fails
-        await sock.sendMessage(from, { text: `Contact Admin for Payment: ${myUpi}` });
+        console.error('Professional Donate Error:', e);
+        await sock.sendMessage(from, { text: "System encountered an error processing the payment request." });
     }
 };
