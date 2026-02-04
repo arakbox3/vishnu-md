@@ -1,48 +1,52 @@
-import axios from "axios"; 
+import axios from "axios";
 
 export default async (sock, msg, args) => {
     const from = msg.key.remoteJid;
+    const sender = msg.sender;
     const prompt = args.join(" ");
-    const apiKey = "AIzaSyAjdhkNjek2l9VCm6N9upQ5L1WuZvb-CC4"; 
 
     if (!prompt) {
-        return await sock.sendMessage(from, { text: "👺 *Asura-MD:* Please provide a prompt! (eg: .photo a futuristic city)" }, { quoted: msg });
+        return await sock.sendMessage(from, { 
+            text: "🔍 *ASURA-MD AI*\n\nPlease provide a description to generate an image.\n\n*Example:* `.photo a samurai in cyberpunk city`" 
+        }, { quoted: msg });
     }
 
     try {
-        // Reaction for processing
-        await sock.sendMessage(from, { react: { text: "🎨", key: msg.key } });
+        // 1. Processing Reaction
+        await sock.sendMessage(from, { react: { text: "⏳", key: msg.key } });
 
-        const response = await axios.post(
-            `https://generativelanguage.googleapis.com/v1beta/models/imagen-3:predict?key=${apiKey}`,
-            {
-                instances: [{ prompt: prompt }],
-                parameters: { sampleCount: 1 }
-            }
-        );
+        // 2. Professional Generation (No Download Mode)
+        // We use a high-quality reliable API endpoint
+        const imageUrl = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=1024&height=1024&seed=${Math.floor(Math.random() * 1000)}&model=flux`;
 
-        // Response-ൽ നിന്ന് ഇമേജ് ഡാറ്റ എടുക്കുന്നു
-        const imageData = response.data.predictions[0].bytesBase64Encoded;
-        const buffer = Buffer.from(imageData, 'base64');
+        // 3. Get Image as Buffer directly in memory
+        const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
+        const buffer = Buffer.from(response.data, 'utf-8');
 
+        // 4. Send Message with Professional UI
         await sock.sendMessage(from, {
             image: buffer,
-            caption: `> 👺Asura MD`,
+            caption: `*🎨 ASURA-MD ART GENERATOR*\n\n✨ *Prompt:* ${prompt}\n👤 *Requested by:* @${sender.split('@')[0]}\n\n> © ASURA-MD INTELLIGENCE`,
+            mentions: [sender],
             contextInfo: {
                 externalAdReply: {
-                    title: "ASURA-MD AI IMAGE GENERATOR",
-                    body: `Prompt: ${prompt}`,
+                    title: "AI IMAGE ENGINE V3",
+                    body: "Generated successfully",
                     mediaType: 1,
-                    renderLargerThumbnail: true 
+                    thumbnail: buffer, // Shows the generated image as a small preview too
+                    sourceUrl: "https://whatsapp.com/channel/0029VbB59W9GehENxhoI5l24",
+                    renderLargerThumbnail: true,
+                    showAdAttribution: false
                 }
             }
         }, { quoted: msg });
 
+        // 5. Success Reaction
         await sock.sendMessage(from, { react: { text: "✅", key: msg.key } });
 
     } catch (e) {
-        console.error("Gemini Photo Error:", e.response ? e.response.data : e.message);
-        await sock.sendMessage(from, { text: "❌ *Error:* സുഖം ആണോ." }, { quoted: msg });
+        console.error("AI Photo Error:", e);
+        await sock.sendMessage(from, { react: { text: "❌", key: msg.key } });
+        await sock.sendMessage(from, { text: "⚠️ *Error:* Failed to generate image. Please try again later." }, { quoted: msg });
     }
 };
-
