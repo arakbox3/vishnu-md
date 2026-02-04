@@ -39,7 +39,7 @@ export default async (sock, msg, args) => {
         const url = response.data;
 
         // 4. Professional Response
-        const responseText = `*───「 👺 ASURA-MD URL 」───*
+        const responseText = `*───「 👺 ASURA-MD 」───*
 
 *✅ Uploaded Successfully!*
 
@@ -55,7 +55,7 @@ export default async (sock, msg, args) => {
                 externalAdReply: {
                     title: "ASURA MEDIA UPLOADER",
                     body: "File converted to permanent link",
-                    thumbnailUrl: "https://files.catbox.moe/9e4b39.jpg",
+                    thumbnailUrl: "http://codeskulptor-demos.commondatastorage.googleapis.com/GalaxyInvaders/back03.jpg",
                     sourceUrl: url,
                     mediaType: 1,
                     renderLargerThumbnail: true
