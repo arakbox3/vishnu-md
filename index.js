@@ -129,6 +129,8 @@ async function startAsura() {
                   }, { quoted: msg });
                return;
              }
+            
+             if (isCmd) {
              const prefix = firstChar;
              const args = body.slice(prefix.length).trim().split(/ +/);
              const commandName = args.shift()?.toLowerCase();
