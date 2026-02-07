@@ -163,12 +163,12 @@ async function startAsura() {
                 }
             } else {
                 console.log(`\x1b[31m[NOT FOUND] -> commands/${commandName}.js\x1b[0m`); 
-            } 
-                 
+             } 
+          }        
         } catch (err) {
             console.error("\x1b[31m[CRITICAL ERROR]\x1b[0m", err);
         }
     });
-
+ }
 // Start the bot
 startAsura();
