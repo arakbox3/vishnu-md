@@ -103,20 +103,15 @@ async function startAsura() {
             }, 10000); 
         }
     });
-    
+ 
     // 5. Message & Command Handler
     sock.ev.on('messages.upsert', async (chatUpdate) => {
     try {
         const msg = chatUpdate.messages[0];
-        if (!msg.message || msg.key.fromMe) return; 
+        if (!msg.message) return; 
 
         const from = msg.key.remoteJid;
         const isLid = from.endsWith('@lid');
-
-        // Typing status... 
-        if (!isLid) {
-            await sock.sendPresenceUpdate('composing', from);
-        }
 
         const mtype = Object.keys(msg.message).filter(key => 
             !['messageContextInfo', 'senderKeyDistributionMessage'].includes(key)
@@ -130,15 +125,29 @@ async function startAsura() {
 
 
        // prefixes
-        const prefixes = ".!@#$%^&*()_+-=÷×[]{};':\"\₩£€\|,.<>/~₹";
+        const prefixes = ".!@#¢$%^&*()_+-=÷×[]{};':\\\"π¶∆\\•√\₩£€\|,.<>/~₹";
         const firstChar = body.charAt(0);
         const isCmd = prefixes.includes(firstChar);
+
+       // Typing status... 
+        if (isCmd && !isLid) {
+            await sock.sendPresenceUpdate('composing', from);
+            await new Promise(resolve => setTimeout(resolve, 4000));
+          }
 
                  if (isCmd && body.trim().length === 1) {
                   await sock.sendMessage(from, { 
                   text: "👺 *Asura-MD:* Please enter a command after the prefix (e.g., .menu) 🥰" 
                   }, { quoted: msg });
                return;
+             }
+            
+             if (isCmd) {
+             const prefix = firstChar;
+             const args = body.slice(prefix.length).trim().split(/ +/);
+             const commandName = args.shift()?.toLowerCase();
+
+             if (!commandName) return;
              }
             
              if (isCmd) {
