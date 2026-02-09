@@ -18,7 +18,7 @@
     "ffmpeg-static": "latest", 
     "jimp": "latest",
     "node-fetch": "latest",
-    "gramjs": "latest",
+    "telegram": "latest",
     "g-i-s": "latest",
     "form-data": "latest", 
     "google-tts-api": "latest",
