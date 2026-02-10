@@ -1,33 +1,31 @@
 import axios from 'axios';
 
-/**
- * Myinstants-ൽ നിന്ന് ഓഡിയോ എടുക്കുന്ന ഫംഗ്ഷൻ
- */
 const getAudio = async (query = '') => {
     try {
-        let url;
-        if (query) {
-            
-            url = `https://www.myinstants.com/search/?name=${encodeURIComponent(query)}`;
-        } else {
-            
-            url = `https://www.myinstants.com/index/in/`;
-        }
+        let url = query 
+            ? `https://www.myinstants.com/search/?name=${encodeURIComponent(query)}`
+            : `https://www.myinstants.com/index/in/`;
 
-        const { data } = await axios.get(url);
+        // ബ്രൗസർ റിക്വസ്റ്റ് ആണെന്ന് തോന്നിപ്പിക്കാൻ ഹെഡേഴ്സ് ചേർക്കുന്നു
+        const { data } = await axios.get(url, {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36'
+            }
+        });
+
+        // MP3 ലിങ്കുകൾ കണ്ടെത്തുന്നു
         const audioMatches = data.match(/\/media\/sounds\/[\w.-]+\.mp3/g);
         
         if (audioMatches && audioMatches.length > 0) {
-            
+            // Shuffle ലോജിക്
             const randomIndex = Math.floor(Math.random() * audioMatches.length);
-            return {
-                status: true,
-                url: `https://www.myinstants.com${audioMatches[randomIndex]}`
-            };
+            const audioUrl = `https://www.myinstants.com${audioMatches[randomIndex]}`;
+            
+            return { status: true, url: audioUrl };
         }
         return { status: false };
     } catch (e) {
-        console.error("Audio Fetch Error:", e);
+        console.error("Audio Error:", e.message);
         return { status: false };
     }
 };
@@ -35,22 +33,23 @@ const getAudio = async (query = '') => {
 export default {
     name: 'audio',
     async execute(m, { args, conn }) {
-        // ഉപയോക്താവ് പേര് നൽകിയിട്ടുണ്ടോ എന്ന് നോക്കുന്നു
         const query = args.join(' ');
         
-        // ലോഡിംഗ് റിയാക്ഷൻ
-        await conn.sendMessage(m.chat, { react: { text: "🎧", key: m.key } });
+        try {
+            const result = await getAudio(query);
 
-        const result = await getAudio(query);
-
-        if (result.status) {
-            await conn.sendMessage(m.chat, {
-                audio: { url: result.url },
-                mimetype: 'audio/ogg',
-                ptt: false 
-            }, { quoted: m });
-        } else {
-            m.reply(query ? `❌ '${query}' not found.` : `❌ Error.`);
+            if (result.status) {
+                // വാട്സാപ്പിലേക്ക് നേരിട്ട് ഓഡിയോ സ്ട്രീം ചെയ്യുന്നു
+                await conn.sendMessage(m.chat, {
+                    audio: { url: result.url },
+                    mimetype: 'audio/ogg',
+                    ptt: true 
+                }, { quoted: m });
+            } else {
+                m.reply("❌ please try again later.");
+            }
+        } catch (err) {
+            m.reply("❌ error.");
         }
     }
 };
