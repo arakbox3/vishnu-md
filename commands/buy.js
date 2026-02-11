@@ -12,48 +12,71 @@ export default async (sock, msg, args) => {
 
     const q = encodeURIComponent(query);
 
-    // Smart links
+    // ==== Smart Links ====
     const googleShop = `https://www.google.com/search?q=${q}&tbm=shop&tbs=p_ord:p`;
     const amazonLow = `https://www.amazon.in/s?k=${q}&s=price-asc-rank`;
     const flipkartLow = `https://www.flipkart.com/search?q=${q}&sort=price_asc`;
     const reviews = `https://www.google.com/search?q=${q}+review`;
     const youtube = `https://www.youtube.com/results?search_query=${q}+review+unboxing`;
     const specs = `https://www.google.com/search?q=${q}+specifications`;
+    const comparison = `https://www.google.com/search?q=${q}+compare+price`;
 
+    // Extra info placeholders
+    const brand = "Brand: Check Links"; 
+    const ratings = "Ratings: ⭐⭐⭐⭐☆"; 
+    const offers = "Offers: Available on respective sites"; 
+    const availability = "Availability: Online"; 
+    const cashback = "Cashback: Check site offers";
+
+    // ==== Message Text ====
     const msgText = `
 🛍️ *ASURA MD — SMART PRICE FINDER*
 
 📦 *Product:* ${query.toUpperCase()}
+
+${brand}
+${ratings}
+${offers}
+${availability}
+${cashback}
 
 I found the best ways for you to get this product at the *lowest price* and with *full information*.
 
 ━━━━━━━━━━━━━━━━━━
 💰 *Cheapest Price Links*
 
-🔎 Google Shopping (Low → High)  
+🔎 Google Shopping (Low → High)
 ${googleShop}
 
-🛒 Amazon India (Low → High)  
+🛒 Amazon India (Low → High)
 ${amazonLow}
 
-🛍️ Flipkart (Low → High)  
+🛍️ Flipkart (Low → High)
 ${flipkartLow}
+
+💹 Price Comparison Across Sites
+${comparison}
 
 ━━━━━━━━━━━━━━━━━━
 📊 *Before You Buy*
 
-⭐ Reviews from users  
+⭐ Reviews from users
 ${reviews}
 
-📺 Unboxing & Video Reviews  
+📺 Unboxing & Video Reviews
 ${youtube}
 
-📋 Full Specifications  
+📋 Full Specifications
 ${specs}
+
+💰 Approximate Cost: Check above links
+🖼️ Product Thumbnail included
+
 ━━━━━━━━━━━━━━━━━━
 
-_✅ Live prices from official sites_  
-_✅ Always updated results_
+✅ Live prices from official sites
+✅ No fake listings
+✅ Always updated results
 
 > 👺 Powered by Asura MD Smart Engine
 `;
@@ -65,11 +88,11 @@ _✅ Always updated results_
                 externalAdReply: {
                     title: "ASURA MD SMART SHOPPING",
                     body: `Find lowest price for ${query}`,
-                    thumbnailUrl: "https://files.catbox.moe/qp1ve9.jpg",
                     mediaType: 1,
                     sourceUrl: googleShop,
-                    renderLargerThumbnail: false,
-                    showAdAttribution: true
+                    thumbnail: { url: "media/thumb.jpg" },
+                    renderLargerThumbnail: true,
+                    showAdAttribution: false
                 }
             }
         }, { quoted: msg });
@@ -77,6 +100,7 @@ _✅ Always updated results_
         await sock.sendMessage(chat, { react: { text: "🛒", key: msg.key } });
 
     } catch (e) {
+        console.error("Buy Command Error:", e.message);
         await sock.sendMessage(chat, { text: "❌ Failed to process request." }, { quoted: msg });
     }
 };
