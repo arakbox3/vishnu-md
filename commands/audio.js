@@ -1,31 +1,59 @@
-import yts from "yt-search";
-import axios from "axios";
-import ffmpeg from "fluent-ffmpeg";
-import { PassThrough } from "stream";
+import axios from 'axios';
+import ytSearch from 'yt-search';
+
+const delay = (ms) => new Promise((res) => setTimeout(res, ms));
+
+// Audio Streaming Function
+const yta = async (url) => {
+    const headers = { 'Referer': 'https://id.ytmp3.mobi/' };
+    let videoID;
+    try {
+        const parsed = new URL(url);
+        if (parsed.hostname === "youtu.be") videoID = parsed.pathname.slice(1);
+        else videoID = parsed.searchParams.get("v");
+    } catch { throw new Error("Invalid URL"); }
+
+    const { data: initData } = await axios.get(
+        `https://d.ymcdn.org/api/v1/init?p=y&23=1llum1n471&_=${Math.random()}`,
+        { headers }
+    );
+    
+    // f: "mp3" എന്നത് ഓഡിയോ ഫയലിന് വേണ്ടിയാണ്
+    const urlParam = { v: videoID, f: "mp3", _: Math.random() };
+    const { data: convertData } = await axios.get(`${initData.convertURL}&${new URLSearchParams(urlParam)}`, { headers });
+
+    let attempts = 0;
+    while (attempts < 30) {
+        const { data: prog } = await axios.get(convertData.progressURL, { headers });
+        if (prog.progress === 3) return { url: convertData.downloadURL };
+        await delay(1000);
+        attempts++;
+    }
+    throw new Error("Timeout");
+};
 
 export default async (sock, msg, args) => {
-  const chat = msg.key.remoteJid;
-  const searchQuery = args.join(" ");
+    const chat = msg.key.remoteJid;
+    const query = args.join(' ');
 
-  if (!searchQuery) {
-    return sock.sendMessage(chat, { text: "❌ Usage: *.audio* [song name/link]" });
-  }
+    if (!query) return sock.sendMessage(chat, { text: "❌ example .audio name/link!" }, { quoted: msg });
 
-  try {
-    const search = await yts(searchQuery);
-    const video = search.videos[0];
-    if (!video) return sock.sendMessage(chat, { text: "❌ Song Not Found!" });
+    try {
+        await sock.sendMessage(chat, { react: { text: "🎧", key: msg.key } });
 
-    const videoUrl = video.url;
+        // Search Video Information
+        const search = await ytSearch(query);
+        const video = search.videos[0];
+        if (!video) return sock.sendMessage(chat, { text: "❌ not found!" }, { quoted: msg });
 
-    // Design Caption
-    const infoText = `*👺⃝⃘̉̉━━━━━━━━◆◆◆*
+        // Your Custom Design Caption
+        const infoText = `*👺⃝⃘̉̉̉━━━━━━━━━◆◆◆◆◆*
 *┊ ┊ ┊ ┊ ┊*
 *┊ ┊ ✫ ˚㋛ ⋆｡ ❀*
 *┊ ☪︎⋆*
 *⊹* 🪔 *Audio Download*
 *✧* 「 \`👺Asura MD\` 」
-*╰───────────❂*
+*╰─────────────────❂*
 ╭•°•❲ *Streaming...* ❳•°•
  ⊙🎬 *TITLE:* ${video.title}
 ╰━━━━━━━━━━━━━━┈⊷
@@ -35,80 +63,33 @@ export default async (sock, msg, args) => {
 ╰━━━━━━━━━━━━━━┈⊷
 *◀︎ •၊၊||၊||||။‌‌‌‌၊||••*
 ╰╌╌╌╌╌╌╌╌╌╌࿐
-╔━━━━━━━━━━━❥❥❥
+╔━━━━━━━━━━━━━❥❥❥
 ┃ *Sending Audio 🔊*
-╚━━━━⛥❖⛥━━━━❥❥❥
+╚━━━━━⛥❖⛥━━━━❥❥❥
 > 📢 Join our channel: https://whatsapp.com/channel/0029VbB59W9GehENxhoI5l24
-> *© ᴄʀᴇᴀᴛᴇ BY 👺Asura MD*`;
+> *© ᴄʀᴇᴀᴛᴇᴅ ʙʏ 👺Asura MD*`;
 
-    // Send Thumbnail
-    await sock.sendMessage(chat, {
-      image: { url: video.thumbnail },
-      caption: infoText
-    });
+        // 1. Send Thumbnail with Design
+        await sock.sendMessage(chat, {
+            image: { url: video.thumbnail },
+            caption: infoText
+        }, { quoted: msg });
 
-    const thumbRes = await axios.get(video.thumbnail, { responseType: 'arraybuffer' });
-    const thumbBuffer = Buffer.from(thumbRes.data);
+        // 2. Get Audio Stream Link
+        const audioData = await yta(video.url);
 
-    let finalAudioUrl = null;
-    const audioApis = [
-        async () => { 
-            const res = await axios.get(`https://api.yupra.my.id/api/downloader/ytmp3?url=${encodeURIComponent(videoUrl)}`);
-            return res.data.data.download_url;
-        },
-        async () => { 
-            const res = await axios.get(`https://okatsu-rolezapiiz.vercel.app/downloader/ytmp3?url=${encodeURIComponent(videoUrl)}`);
-            return res.data.dl;
-        }
-    ];
+        // 3. Send Audio File (PTT: false for normal audio)
+        await sock.sendMessage(chat, {
+            audio: { url: audioData.url },
+            mimetype: 'audio/mpeg',
+            ptt: false 
+        }, { quoted: msg });
 
-    for (const getAUrl of audioApis) {
-        try {
-            finalAudioUrl = await getAUrl();
-            if (finalAudioUrl) break;
-        } catch (e) { console.log("API Layer Failed..."); }
+        await sock.sendMessage(chat, { react: { text: "✅", key: msg.key } });
+
+    } catch (e) {
+        console.error(e);
+        await sock.sendMessage(chat, { text: "❌ error." }, { quoted: msg });
     }
-
-    if (!finalAudioUrl) throw new Error("All Audio APIs failed");
-
-    // Function to convert stream to buffer for stable sending
-    const getBuffer = (stream) => {
-        return new Promise((resolve, reject) => {
-            const chunks = [];
-            stream.on('data', (chunk) => chunks.push(chunk));
-            stream.on('end', () => resolve(Buffer.concat(chunks)));
-            stream.on('error', reject);
-        });
-    };
-
-    // 1. ✅ Audio (MP3 format conversion via FFmpeg stream)
-    const audioStream = new PassThrough();
-    ffmpeg(finalAudioUrl)
-        .toFormat('mp3')
-        .audioBitrate(128)
-        .on('error', (err) => console.log('FFmpeg Audio Error:', err.message))
-        .pipe(audioStream);
-
-    const audioBuffer = await getBuffer(audioStream);
-
-    await sock.sendMessage(chat, {
-      audio: audioBuffer,
-      mimetype: "audio/mpeg",
-      fileName: `${video.title}.mp3`,
-      contextInfo: {
-        externalAdReply: {
-          title: video.title,
-          body: 'Asura MD 👺',
-          thumbnail: thumbBuffer,
-          mediaType: 1,
-          sourceUrl: videoUrl,
-          renderLargerThumbnail: true,
-        }
-      }
-    }, { quoted: msg });
-
-  } catch (err) {
-    console.error(err);
-    await sock.sendMessage(chat, { text: "❌ All servers are busy. Please try again later!" });
-  }
 };
+
