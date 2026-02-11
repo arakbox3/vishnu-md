@@ -1,59 +1,38 @@
 import axios from 'axios';
 import ytSearch from 'yt-search';
 
-const delay = (ms) => new Promise((res) => setTimeout(res, ms));
-
-// Audio Streaming Function
-const yta = async (url) => {
+const getAudioLink = async (url) => {
     const headers = { 'Referer': 'https://id.ytmp3.mobi/' };
-    let videoID;
-    try {
-        const parsed = new URL(url);
-        if (parsed.hostname === "youtu.be") videoID = parsed.pathname.slice(1);
-        else videoID = parsed.searchParams.get("v");
-    } catch { throw new Error("Invalid URL"); }
-
-    const { data: initData } = await axios.get(
-        `https://d.ymcdn.org/api/v1/init?p=y&23=1llum1n471&_=${Math.random()}`,
-        { headers }
-    );
+    const videoID = url.includes('youtu.be') ? url.split('/').pop() : new URL(url).searchParams.get('v');
     
-    // f: "mp3" എന്നത് ഓഡിയോ ഫയലിന് വേണ്ടിയാണ്
-    const urlParam = { v: videoID, f: "mp3", _: Math.random() };
+    const { data: initData } = await axios.get(`https://d.ymcdn.org/api/v1/init?p=y&23=1llum1n471&_=${Math.random()}`, { headers });
+    const urlParam = { v: videoID, f: 'mp3', _: Math.random() };
     const { data: convertData } = await axios.get(`${initData.convertURL}&${new URLSearchParams(urlParam)}`, { headers });
-
-    let attempts = 0;
-    while (attempts < 30) {
-        const { data: prog } = await axios.get(convertData.progressURL, { headers });
-        if (prog.progress === 3) return { url: convertData.downloadURL };
-        await delay(1000);
-        attempts++;
-    }
-    throw new Error("Timeout");
+    
+    return convertData.downloadURL; 
 };
 
 export default async (sock, msg, args) => {
     const chat = msg.key.remoteJid;
     const query = args.join(' ');
 
-    if (!query) return sock.sendMessage(chat, { text: "❌ example .audio name/link!" }, { quoted: msg });
+    if (!query) return sock.sendMessage(chat, { text: "❌ .audio name/link!" }, { quoted: msg });
 
     try {
-        await sock.sendMessage(chat, { react: { text: "🎧", key: msg.key } });
+        await sock.sendMessage(chat, { react: { text: "⏳", key: msg.key } });
 
-        // Search Video Information
+        // 1. YouTube Search
         const search = await ytSearch(query);
         const video = search.videos[0];
-        if (!video) return sock.sendMessage(chat, { text: "❌ not found!" }, { quoted: msg });
+        if (!video) throw new Error("Not Found");
 
-        // Your Custom Design Caption
-        const infoText = `*👺⃝⃘̉̉̉━━━━━━━━━◆◆◆◆◆*
+        const infoText = `*👺⃝⃘̉̉━━━━━━━━◆◆◆*
 *┊ ┊ ┊ ┊ ┊*
 *┊ ┊ ✫ ˚㋛ ⋆｡ ❀*
 *┊ ☪︎⋆*
 *⊹* 🪔 *Audio Download*
 *✧* 「 \`👺Asura MD\` 」
-*╰─────────────────❂*
+*╰───────────❂*
 ╭•°•❲ *Streaming...* ❳•°•
  ⊙🎬 *TITLE:* ${video.title}
 ╰━━━━━━━━━━━━━━┈⊷
@@ -63,26 +42,32 @@ export default async (sock, msg, args) => {
 ╰━━━━━━━━━━━━━━┈⊷
 *◀︎ •၊၊||၊||||။‌‌‌‌၊||••*
 ╰╌╌╌╌╌╌╌╌╌╌࿐
-╔━━━━━━━━━━━━━❥❥❥
+╔━━━━━━━━━━━❥❥❥
 ┃ *Sending Audio 🔊*
-╚━━━━━⛥❖⛥━━━━❥❥❥
+╚━━━━⛥❖⛥━━━━❥❥❥
 > 📢 Join our channel: https://whatsapp.com/channel/0029VbB59W9GehENxhoI5l24
-> *© ᴄʀᴇᴀᴛᴇᴅ ʙʏ 👺Asura MD*`;
+> *© ᴄʀᴇᴀᴛᴇ BY 👺Asura MD*`;
 
-        // 1. Send Thumbnail with Design
+        // 2. തംബ്നെയിൽ വിത്ത് ക്യാപ്ഷൻ അയക്കുന്നു
         await sock.sendMessage(chat, {
             image: { url: video.thumbnail },
             caption: infoText
         }, { quoted: msg });
 
-        // 2. Get Audio Stream Link
-        const audioData = await yta(video.url);
-
-        // 3. Send Audio File (PTT: false for normal audio)
+        // 3. സ്ട്രീമിംഗ് ലിങ്ക് എടുക്കുന്നു
+        const audioUrl = await getAudioLink(video.url);
+        
+        // രീതി 1: Regular Audio File
         await sock.sendMessage(chat, {
-            audio: { url: audioData.url },
+            audio: { url: audioUrl },
             mimetype: 'audio/mpeg',
             ptt: false 
+        }, { quoted: msg });
+
+        await sock.sendMessage(chat, {
+            audio: { url: audioUrl },
+            mimetype: 'audio/ogg; codecs=opus',
+            ptt: true 
         }, { quoted: msg });
 
         await sock.sendMessage(chat, { react: { text: "✅", key: msg.key } });
@@ -92,4 +77,3 @@ export default async (sock, msg, args) => {
         await sock.sendMessage(chat, { text: "❌ error." }, { quoted: msg });
     }
 };
-
