@@ -2,11 +2,6 @@ import axios from 'axios';
 import ytSearch from 'yt-search';
 import { PassThrough } from 'stream';
 import ffmpeg from 'fluent-ffmpeg';
-
-/**
- * Function to get the direct download link
- * Uses a third-party API to bypass YouTube restrictions
- */
 const getAudioUrl = async (url) => {
     const headers = { 'Referer': 'https://id.ytmp3.mobi/' };
     const videoID = url.includes('youtu.be') ? url.split('/').pop() : new URL(url).searchParams.get('v');
@@ -28,7 +23,7 @@ export default async (sock, msg, args) => {
 
     try {
         // Send loading reaction
-        await sock.sendMessage(chat, { react: { text: "⏳", key: msg.key } });
+        await sock.sendMessage(chat, { react: { text: "🎧", key: msg.key } });
 
         // 1. YouTube Search
         const search = await ytSearch(query);
@@ -64,43 +59,41 @@ export default async (sock, msg, args) => {
             caption: infoText
         }, { quoted: msg });
 
-        // 3. Get the direct audio URL
-        const rawAudioUrl = await getAudioUrl(video.url);
+        // 3. Get the direct audio URL        
+try {
+    const rawAudioUrl = await getAudioUrl(video.url);
+    const tempFile = path.join(`./${Date.now()}.mp3`);
+    const tempPtt = path.join(`./${Date.now()}.opus`);
 
-        // 4. Download and send as regular MP3 File
-        const response = await axios.get(rawAudioUrl, { responseType: 'arraybuffer' });
-        const audioBuffer = Buffer.from(response.data);
+    // 1. MP3 
+    const response = await axios.get(rawAudioUrl, { responseType: 'arraybuffer' });
+    fs.writeFileSync(tempFile, Buffer.from(response.data));
+
+    await sock.sendMessage(chat, {
+        audio: fs.readFileSync(tempFile),
+        mimetype: 'audio/ogg',
+        ptt: false 
+    }, { quoted: msg });
+
+    // 2. PTT (Voice Note) 
+    exec(`ffmpeg -i ${tempFile} -c:a libopus -b:a 128k -vbr on ${tempPtt}`, async (err) => {
+        if (err) {
+            console.log('FFmpeg Error:', err);
+            return;
+        }
 
         await sock.sendMessage(chat, {
-            audio: audioBuffer,
-            mimetype: 'audio/mpeg',
-            ptt: false 
+            audio: fs.readFileSync(tempPtt),
+            mimetype: 'audio/ogg; codecs=opus',
+            ptt: true 
         }, { quoted: msg });
 
-        // 5. Convert to Voice Note (PTT) using FFmpeg
-        // We push chunks to a buffer to ensure it is playable on all devices
-        const pttChunks = [];
-        const pttStream = new PassThrough();
+        // temporary save file delete
+        fs.unlinkSync(tempFile);
+        fs.unlinkSync(tempPtt);
 
-        ffmpeg(rawAudioUrl)
-            .audioCodec('libopus')
-            .toFormat('opus')
-            .audioBitrate('128k')
-            .on('error', (err) => console.log('FFmpeg Error:', err))
-            .pipe(pttStream);
-
-        pttStream.on('data', (chunk) => pttChunks.push(chunk));
-        pttStream.on('end', async () => {
-            const finalPttBuffer = Buffer.concat(pttChunks);
-            await sock.sendMessage(chat, {
-                audio: finalPttBuffer,
-                mimetype: 'audio/ogg; codecs=opus',
-                ptt: true 
-            }, { quoted: msg });
-
-            // Send success reaction
-            await sock.sendMessage(chat, { react: { text: "✅", key: msg.key } });
-        });
+        await sock.sendMessage(chat, { react: { text: "✅", key: msg.key } });
+    });
 
     } catch (e) {
         console.error("Audio Play Error:", e);
