@@ -75,7 +75,7 @@ const inputMp3 = `./in_${Date.now()}.mp3`;
         }
 
         // 2. Voice Note (PTT) 
-        await execPromise(`ffmpeg -i ${inputMp3} -vn -ac 1 -c:a libopus -b:a 64k -application voip -ar 48000 ${outputOpus}`);
+        await execPromise(`ffmpeg -i ${inputMp3} -vn -ac 1 -c:a opus -b:a 64k -application voip -ar 48000 ${outputOpus}`);
         if (fs.existsSync(outputOpus)) {
             await sock.sendMessage(chat, {
                 audio: fs.readFileSync(outputOpus),
