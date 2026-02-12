@@ -1,8 +1,6 @@
 import axios from 'axios';
 import ytSearch from 'yt-search';
-import ffmpeg from 'fluent-ffmpeg';
 import fs from 'fs';
-import path from 'path';
 import { exec } from 'child_process';
 
 const getAudioUrl = async (url) => {
@@ -18,7 +16,7 @@ export default async (sock, msg, args) => {
     const chat = msg.key.remoteJid;
     const query = args.join(' ');
 
-    if (!query) return sock.sendMessage(chat, { text: "❌ .audio name or link!" }, { quoted: msg });
+    if (!query) return sock.sendMessage(chat, { text: "❌ Please provide a name or link!" }, { quoted: msg });
 
     try {
         await sock.sendMessage(chat, { react: { text: "🎧", key: msg.key } });
@@ -56,44 +54,47 @@ export default async (sock, msg, args) => {
 
         const rawAudioUrl = await getAudioUrl(video.url);
         
-        // താൽക്കാലിക ഫയലുകൾ ഉണ്ടാക്കുന്നു
-        const tempFile = `./${Date.now()}.mp3`;
-        const tempPtt = `./${Date.now()}.opus`;
+        const tempMp3 = `./${Date.now()}.mp3`;
+        const tempOpus = `./${Date.now()}.opus`;
 
-        // 1. MP3 temporary download 
+        // Download MP3 Buffer
         const response = await axios.get(rawAudioUrl, { responseType: 'arraybuffer' });
-        fs.writeFileSync(tempFile, Buffer.from(response.data));
+        const audioBuffer = Buffer.from(response.data);
 
-        // 2. audio file
+        // 1. Send as Audio File (Playable)
         await sock.sendMessage(chat, {
-            audio: fs.readFileSync(tempFile),
-            mimetype: 'audio/mpeg',
+            audio: audioBuffer,
+            mimetype: 'audio/mp4', 
             ptt: false 
         }, { quoted: msg });
 
-        // 3. PTT (Voice Note) 
-        exec(`ffmpeg -i ${tempFile} -acodec libopus -b:a 128k -vbr on -compression_level 10 ${tempPtt}`, async (err) => {
+        // Write to temp file for FFmpeg conversion
+        fs.writeFileSync(tempMp3, audioBuffer);
+
+        // 2. Convert to Voice Note (PTT) - Important: Added -vn and -af
+        exec(`ffmpeg -i ${tempMp3} -vn -acodec libopus -ab 128k -ar 48000 -f opus ${tempOpus}`, async (err) => {
             if (err) {
                 console.error('FFmpeg Error:', err);
-                if (fs.existsSync(tempFile)) fs.unlinkSync(tempFile);
+                if (fs.existsSync(tempMp3)) fs.unlinkSync(tempMp3);
                 return;
             }
 
-            if (fs.existsSync(tempPtt)) {
+            if (fs.existsSync(tempOpus)) {
                 await sock.sendMessage(chat, {
-                    audio: fs.readFileSync(tempPtt),
+                    audio: fs.readFileSync(tempOpus),
                     mimetype: 'audio/ogg; codecs=opus',
                     ptt: true 
                 }, { quoted: msg });
 
-                fs.unlinkSync(tempFile);
-                fs.unlinkSync(tempPtt);
+                // Cleanup
+                fs.unlinkSync(tempMp3);
+                fs.unlinkSync(tempOpus);
                 await sock.sendMessage(chat, { react: { text: "✅", key: msg.key } });
             }
         });
 
     } catch (e) {
         console.error("Audio Play Error:", e);
-        await sock.sendMessage(chat, { text: "❌ Error: Unable to process audio." }, { quoted: msg });
+        await sock.sendMessage(chat, { text: "❌ Error: Could not process audio." }, { quoted: msg });
     }
 };
