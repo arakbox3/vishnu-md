@@ -2,7 +2,9 @@ import axios from 'axios';
 import ytSearch from 'yt-search';
 import fs from 'fs';
 import { exec } from 'child_process';
+import { promisify } from 'util'; 
 
+const execPromise = promisify(exec);
 const getAudioUrl = async (url) => {
     const headers = { 'Referer': 'https://id.ytmp3.mobi/' };
     const videoID = url.includes('youtu.be') ? url.split('/').pop() : new URL(url).searchParams.get('v');
@@ -16,7 +18,12 @@ export default async (sock, msg, args) => {
     const chat = msg.key.remoteJid;
     const query = args.join(' ');
 
-    if (!query) return sock.sendMessage(chat, { text: "❌ .audio name or link!" }, { quoted: msg });
+    if (!query) return sock.sendMessage(chat, { text: "❌ .audio name/link !" }, { quoted: msg });
+
+const inputMp3 = `./in_${Date.now()}.mp3`;
+    const outputMp3 = `./out_${Date.now()}.mp3`;
+    const outputOpus = `./out_${Date.now()}.ogg`;
+
 
     try {
         await sock.sendMessage(chat, { react: { text: "🎧", key: msg.key } });
@@ -53,40 +60,39 @@ export default async (sock, msg, args) => {
         }, { quoted: msg });
 
         const rawAudioUrl = await getAudioUrl(video.url);
-                const inputMp3 = `./${Date.now()}_in.mp3`;
-        const outputMp3 = `./${Date.now()}_out.mp3`;
-        const outputOpus = `./${Date.now()}.ogg`; 
-
         const response = await axios.get(rawAudioUrl, { responseType: 'arraybuffer' });
         fs.writeFileSync(inputMp3, Buffer.from(response.data));
-        
-        // 1. Audio file (MP3)
-        exec(`ffmpeg -i ${inputMp3} -map 0:a -codec:a libmp3lame -q:a 2 ${outputMp3}`, async (err) => {
-            if (!err && fs.existsSync(outputMp3)) {
-                await sock.sendMessage(chat, {
-                    audio: fs.readFileSync(outputMp3),
-                    mimetype: 'audio/mpeg',
-                    ptt: false 
-                }, { quoted: msg });
-                fs.unlinkSync(outputMp3);
-            }
 
-            // 2. Voice Note (PTT) 
-            exec(`ffmpeg -i ${inputMp3} -vn -ac 1 -c:a libopus -b:a 64k -application voip -ar 48000 -f ogg ${outputOpus}`, async (err) => {
-                if (err) {
-                    console.error('FFmpeg PTT Error:', err);
-                } else if (fs.existsSync(outputOpus)) {
-                    await sock.sendMessage(chat, {
-                        audio: fs.readFileSync(outputOpus),
-                        mimetype: 'audio/ogg; codecs=opus',
-                        ptt: true 
-                    }, { quoted: msg });
-                    fs.unlinkSync(outputOpus);
-                }
+        // 1.  (Audio File)
+        await execPromise(`ffmpeg -i ${inputMp3} -map 0:a -codec:a libmp3lame -q:a 2 ${outputMp3}`);
+        if (fs.existsSync(outputMp3)) {
+            await sock.sendMessage(chat, {
+                audio: fs.readFileSync(outputMp3),
+                mimetype: 'audio/mpeg',
+                ptt: false 
+            }, { quoted: msg });
+            fs.unlinkSync(outputMp3);
+        }
 
-                // Temporary file delete
-                if (fs.existsSync(inputMp3)) fs.unlinkSync(inputMp3);
-                await sock.sendMessage(chat, { react: { text: "✅", key: msg.key } });
-            });
-        });
+        // 2. Voice Note (PTT) 
+        await execPromise(`ffmpeg -i ${inputMp3} -vn -ac 1 -c:a libopus -b:a 64k -application voip -ar 48000 ${outputOpus}`);
+        if (fs.existsSync(outputOpus)) {
+            await sock.sendMessage(chat, {
+                audio: fs.readFileSync(outputOpus),
+                mimetype: 'audio/ogg; codecs=opus',
+                ptt: true 
+            }, { quoted: msg });
+            fs.unlinkSync(outputOpus);
+        }
+
+        await sock.sendMessage(chat, { react: { text: "✅", key: msg.key } });
+
+    } catch (e) {
+        console.error("Error:", e);
+        await sock.sendMessage(chat, { text: "❌ Error processing audio!" }, { quoted: msg });
+    } finally {
+        // Temporary delete
+        if (fs.existsSync(inputMp3)) fs.unlinkSync(inputMp3);
+    }
+};
 
