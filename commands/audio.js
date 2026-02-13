@@ -2,6 +2,8 @@ import axios from 'axios';
 import ytSearch from 'yt-search';
 import { PassThrough } from 'stream';
 import ffmpeg from 'fluent-ffmpeg';
+import ffmpegPath from 'ffmpeg-static';
+ffmpeg.setFfmpegPath(ffmpegPath);
 
 //Direct youtube 
 const getAudioUrl = async (url) => {
@@ -56,34 +58,45 @@ export default async (sock, msg, args) => {
             caption: infoText
         }, { quoted: msg });
 
-        // 3. streaming 
+        // 3. streaming
         const rawAudioUrl = await getAudioUrl(video.url);
+        const response = await axios.get(rawAudioUrl, { responseType: 'arraybuffer' });
+        const inputBuffer = Buffer.from(response.data);
 
-    const response = await axios.get(rawAudioUrl, { 
-            responseType: 'arraybuffer',
-            headers: { 'User-Agent': 'Mozilla/5.0' },
-            maxContentLength: Infinity,
-            maxBodyLength: Infinity,
-            timeout: 60000
-        });
+        // FFmpeg conversion 
+        const convertAudio = () => {
+            return new Promise((resolve, reject) => {
+                const stream = new PassThrough();
+                stream.end(inputBuffer);
+                let chunks = [];
 
-        const audioBuffer = Buffer.from(response.data);
+                ffmpeg(stream)
+                    .toFormat('mp3')
+                    .audioBitrate(128)
+                    .on('error', reject)
+                    .pipe()
+                    .on('data', chunk => chunks.push(chunk))
+                    .on('end', () => resolve(Buffer.concat(chunks)));
+            });
+        };
 
-        // ഓഡിയോ അയക്കുന്നു
-        if (audioBuffer.length > 0) {
+        const finalBuffer = await convertAudio();
+
+        if (finalBuffer.length > 0) {
             await sock.sendMessage(chat, {
-                audio: audioBuffer,
+                audio: finalBuffer,
                 mimetype: 'audio/mpeg',
-                fileName: `asura.mp3`,
+                fileName: `${video.title}.mp3`,
+                ptt: false 
             }, { quoted: msg });
-            
+
             await sock.sendMessage(chat, { react: { text: "✅", key: msg.key } });
-        } else {
-            throw new Error("EMPTY_BUFFER");
         }
 
     } catch (e) {
         console.error("Audio Play Error:", e);
-        await sock.sendMessage(chat, { text: "❌ error" }, { quoted: msg });
+        await sock.sendMessage(chat, { text: "❌ error: " + e.message }, { quoted: msg });
     }
 };
+
+  
