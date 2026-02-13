@@ -16,6 +16,9 @@ const getAudioUrl = async (url) => {
     return convertData.downloadURL;
 };
 
+if (fs.existsSync(ffPath)) {
+    fs.chmodSync(ffPath, 0o755);
+}
 export default async (sock, msg, args) => {
     const chat = msg.key.remoteJid;
     const query = args.join(' ');
@@ -24,7 +27,7 @@ export default async (sock, msg, args) => {
 
     const inputMp3 = `./in_${Date.now()}.mp3`;
     const outputMp3 = `./out_${Date.now()}.mp3`;
-    const outputOpus = `./out_${Date.now()}.opus`;
+    const outputOpus = `./out_${Date.now()}.ogg`;
 
 
     try {
@@ -67,28 +70,30 @@ export default async (sock, msg, args) => {
         const response = await axios.get(rawAudioUrl, { responseType: 'arraybuffer' });
         fs.writeFileSync(inputMp3, Buffer.from(response.data));
 
-     // --- 1. SEND AUDIO FILE (Fixed) ---
+  // --- 1. SEND AUDIO FILE ---
 try {
+    console.log("Starting Audio Conversion...");
+    await execPromise(`"${ffPath}" -y -i "${inputMp3}" -vn -ab 128k "${outputMp3}"`, { timeout: 45000 });
     
-    await execPromise(`"${ffPath}" -y -i "${inputMp3}" -vn -c:a libmp3lame -q:a 4 "${outputMp3}"`);
     if (fs.existsSync(outputMp3)) {
         await sock.sendMessage(chat, {
             audio: fs.readFileSync(outputMp3),
-            mimetype: 'audio/mp4', 
+            mimetype: 'audio/mpeg', 
             ptt: false 
         }, { quoted: msg });
         fs.unlinkSync(outputMp3);
+        console.log("Audio Sent!");
     }
 } catch (err) {
     console.error("Audio conversion failed:", err);
-    
-    await sock.sendMessage(chat, { audio: fs.readFileSync(inputMp3), mimetype: 'audio/mpeg' }, { quoted: msg });
 }
 
-// --- 2. SEND VOICE NOTE (PTT Fixed) ---
+await new Promise(resolve => setTimeout(resolve, 1000));
+
+// --- 2. SEND VOICE NOTE (PTT) ---
 try { 
-   
-    await execPromise(`"${ffPath}" -y -i "${inputMp3}" -vn -ac 1 -c:a libopus -b:a 64k -application voip -flags +global_header -ar 48000 "${outputOpus}"`);
+    console.log("Starting PTT Conversion...");
+    await execPromise(`"${ffPath}" -y -i "${inputMp3}" -vn -ac 1 -acodec libopus -b:a 64k -vbr on -ar 48000 -f ogg "${outputOpus}"`, { timeout: 45000 });
     
     if (fs.existsSync(outputOpus)) {
         await sock.sendMessage(chat, {
@@ -97,6 +102,7 @@ try {
             ptt: true 
         }, { quoted: msg });
         fs.unlinkSync(outputOpus);
+        console.log("PTT Sent!");
     }
 } catch (err) {
     console.error("PTT conversion failed:", err);
@@ -110,4 +116,3 @@ try {
     } finally {
         if (fs.existsSync(inputMp3)) fs.unlinkSync(inputMp3);
     }
-
