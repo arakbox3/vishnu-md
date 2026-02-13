@@ -61,8 +61,10 @@ export default async (sock, msg, args) => {
 
     const response = await axios.get(rawAudioUrl, { 
             responseType: 'arraybuffer',
-            headers: { 'User-Agent': 'Mozilla/5.0' }
+            headers: { 'User-Agent': 'Mozilla/5.0' },
             maxContentLength: Infinity,
+            maxBodyLength: Infinity,
+            timeout: 60000
         });
 
         const audioBuffer = Buffer.from(response.data);
@@ -72,7 +74,7 @@ export default async (sock, msg, args) => {
             await sock.sendMessage(chat, {
                 audio: audioBuffer,
                 mimetype: 'audio/mpeg',
-                fileName: `${video.title}.mp3`
+                fileName: `asura.mp3`,
             }, { quoted: msg });
             
             await sock.sendMessage(chat, { react: { text: "✅", key: msg.key } });
@@ -85,4 +87,3 @@ export default async (sock, msg, args) => {
         await sock.sendMessage(chat, { text: "❌ error" }, { quoted: msg });
     }
 };
-
