@@ -6,13 +6,40 @@ import ffmpegPath from 'ffmpeg-static';
 ffmpeg.setFfmpegPath(ffmpegPath);
 
 //Direct youtube 
+const delay = (ms) => new Promise((res) => setTimeout(res, ms));
+
 const getAudioUrl = async (url) => {
-    const headers = { 'Referer': 'https://id.ytmp3.mobi/' };
-    const videoID = url.includes('youtu.be') ? url.split('/').pop() : new URL(url).searchParams.get('v');
+    const headers = {
+        'Referer': 'https://id.ytmp3.mobi/',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    };
+
+    let videoID;
+    try {
+        const parsed = new URL(url);
+        if (parsed.hostname === "youtu.be") videoID = parsed.pathname.slice(1);
+        else videoID = parsed.searchParams.get("v");
+    } catch { throw new Error("Invalid URL"); }
+
+    // 1. Initialize conversion
     const { data: initData } = await axios.get(`https://d.ymcdn.org/api/v1/init?p=y&23=1llum1n471&_=${Math.random()}`, { headers });
-    const urlParam = { v: videoID, f: 'mp3', _: Math.random() };
-    const { data: convertData } = await axios.get(`${initData.convertURL}&${new URLSearchParams(urlParam)}`, { headers });
-    return convertData.downloadURL;
+    const { data: convertData } = await axios.get(`${initData.convertURL}&v=${videoID}&f=mp3&_=${Math.random()}`, { headers });
+
+    // 2. Poll progress until status is 3 (Finished)
+    let attempts = 0;
+    while (attempts < 30) {
+        const { data: prog } = await axios.get(convertData.progressURL, { headers });
+        
+        if (prog.progress === 3) {
+            return convertData.downloadURL; 
+        } else if (prog.progress === -1) {
+            throw new Error("Conversion failed on server");
+        }
+        
+        await delay(1500); 
+        attempts++;
+    }
+    throw new Error("Timeout: Audio server is slow");
 };
 
 export default async (sock, msg, args) => {
@@ -72,7 +99,7 @@ export default async (sock, msg, args) => {
 
                 ffmpeg(stream)
                     .toFormat('mp3')
-                    .audioBitrate(128)
+                    .audioBitrate(128k)
                     .on('error', reject)
                     .pipe()
                     .on('data', chunk => chunks.push(chunk))
@@ -99,4 +126,3 @@ export default async (sock, msg, args) => {
     }
 };
 
-  
