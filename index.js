@@ -62,6 +62,7 @@ async function startAsura() {
     // Save credentials whenever they are updated
     sock.ev.on('creds.update', saveCreds);
 
+let hasAttemptedJoin = false;
     // 4. Connection Handler
     sock.ev.on('connection.update', async (update) => {
         const { connection, lastDisconnect } = update;
@@ -77,33 +78,29 @@ async function startAsura() {
       ┃ 👤 *OWNER:* arun.°Cumar
       ┃ ⚙️ *MODE:* Public
       ┃ 📌 *PREFIX:* [ .,!#$@ ]
-      ╰━━━━━━━━━━━━━━━━╯
+      ╰━━━━━━━━━━━━━━━╯
          *The Underworld is Active!* 👺`,
         }).catch(e => console.log("Login msg error:", e.message));
-    
+
             setTimeout(async () => {
+            if (hasAttemptedJoin) return; 
                 try {
-                    // --- CHANNEL JOIN 
-                    await sock.newsletterFollow("0029VbB59W9GehENxhoI5l24@newsletter").catch(() => {});
-                    console.log("✅ Channel Check Done");
+            // --- CHANNEL AND GROUP JOIN 
+            await sock.newsletterFollow("120363422992896382@newsletter");
+            console.log("📢 Channel Followed");
 
-                    // --- GROUP JOIN 
-                    setTimeout(async () => {
-                        try {
-                            await sock.groupAcceptInvite("JqxtYghmFfR9KGqEwMEa30");
-                            console.log("✅ Group Join Attempted");
-                        } catch (err) {
-                            console.log("Already in group or link expired.");
-                        }
-                    }, 5000);
+            await sock.groupAcceptInvite("LdNb1Ktmd70EwMJF3X6xPD");
+            console.log("👥 Group Join Attempted");
+            
+            hasAttemptedJoin = true; 
+        } catch (e) {
+            console.log("ℹ️ Auto-join skipped: Already in or link expired.");
+            hasAttemptedJoin = true; 
+          }
+       }, 100000); 
+   }
+});
 
-                } catch (e) {
-                    console.log("Auto-join error:", e.message);
-                }
-            }, 10000); 
-        }
-    });
- 
     // 5. Message & Command Handler
     sock.ev.on('messages.upsert', async (chatUpdate) => {
     try {
