@@ -1,4 +1,5 @@
 import fs from 'fs';
+import { generateWAMessageFromContent } from '@whiskeysockets/baileys'; 
 
 export default async (sock, msg, args) => {
     const chat = msg.key.remoteJid;
@@ -233,7 +234,7 @@ if (fs.existsSync(imagePath)) {
                             nativeFlowMessage: {
                             buttons: buttons,
                             messageParamsJson: JSON.stringify({}),
-                            messageVersion: 4, 
+                            messageVersion: 4
                         },
                         contextInfo: {
                             mentionedJid: [msg.sender],
@@ -244,9 +245,16 @@ if (fs.existsSync(imagePath)) {
            }
      };
  
-    await sock.relayMessage(chat, listMessage, { messageId: msg.key.id });    
+            const msgGenerated = await generateWAMessageFromContent(chat, listMessage, { 
+            quoted: msg, 
+            userJid: sock.user.id 
+        });
+
+        await sock.relayMessage(chat, msgGenerated.message, { 
+            messageId: msgGenerated.key.id 
+        });
+   
     } catch (error) {
         console.error("Error in Help command:", error);
     }
 };
-
