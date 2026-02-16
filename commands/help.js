@@ -195,7 +195,63 @@ if (fs.existsSync(imagePath)) {
                 }
             }, { quoted: msg });
         }
+       const buttons = [
+            {
+                "name": "single_select",
+                "buttonParamsJson": JSON.stringify({
+                    "title": "Asura-MD Whatsapp Bot",
+                    "sections": [
+                        {
+                            "title": "Asura MD Commands",
+                            "rows": [
+                                { "title": "📜 Menu", "rowId": ".menu", "description": "Show all commands" },
+                                { "title": "🏓 Ping", "rowId": ".ping", "description": "Check speed" },
+                                { "title": "🔋 Alive", "rowId": ".alive", "description": "Check status" },
+                                { "title": "🤴 Owner", "rowId": ".owner", "description": "Check creator" }
+                            ]
+                        },
+                        {
+                            "title": "Downloader",
+                            "rows": [
+                                { "title": "🎬 Video", "rowId": ".video", "description": "Download Video" },
+                                { "title": "🔊 Audio", "rowId": ".audio", "description": "Download MP3" }
+                            ]
+                        }
+                    ]
+                })
+            }
+        ];
 
+        const listMessage = {
+            viewOnceMessage: {
+                message: {
+                    interactiveMessage: {
+                        header: { title: "", hasMediaAttachment: false },
+                        body: { text: "click on the button:" },
+                        footer: { text: "© Asura MD" },
+                        nativeFlowMessage: {
+                            buttons: buttons,
+                            messageParamsJson: JSON.stringify({})
+                        },
+                        contextInfo: {
+                            mentionedJid: [msg.sender],
+                            forwardingScore: 999,
+                            isForwarded: true,
+
+                            externalAdReply: {
+                                title: 'Asura MD 👺',
+                                thumbnail: fs.existsSync(imagePath) ? fs.readFileSync(imagePath) : null,
+                                sourceUrl: 'https://whatsapp.com/channel/0029VbB59W9GehENxhoI5l24',
+                                mediaType: 1
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        await sock.relayMessage(chat, listMessage, {});
+        
     } catch (error) {
         console.error("Error in Help command:", error);
     }
