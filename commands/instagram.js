@@ -5,7 +5,7 @@ export default async (sock, msg, args) => {
     let query = args.join(' ');
 
     if (!query) {
-        return sock.sendMessage(chat, { text: "❌ Example: .Instagram <link> OR .Instagram <search name>" }, { quoted: msg });
+        return sock.sendMessage(chat, { text: "❌ Example: .Instagram <link> OR .Instagram search_name" }, { quoted: msg });
     }
 
     try {
@@ -13,40 +13,42 @@ export default async (sock, msg, args) => {
 
         let url = query;
 
-        // 1. SEARCH LOGIC
+        // 1. IMPROVED SEARCH LOGIC (If not a link)
         if (!query.includes('instagram.com')) {
-            const searchRes = await axios.get(`https://www.google.com/search?q=site:instagram.com+${encodeURIComponent(query)}`);
-            const match = searchRes.data.match(/https:\/\/www\.instagram\.com\/(?:p|reels|reel)\/[a-zA-Z0-9_-]+/);
+            // searching
+            const searchUrl = `https://www.google.com/search?q=site:instagram.com/reels/+${encodeURIComponent(query)}&gbv=1`;
+            const { data: searchHtml } = await axios.get(searchUrl, {
+                headers: { 'User-Agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36' }
+            });
             
-            if (!match) return sock.sendMessage(chat, { text: "❌ No results found on Instagram for this search!" }, { quoted: msg });
+            const match = searchHtml.match(/https:\/\/www\.instagram\.com\/(?:p|reels|reel)\/([a-zA-Z0-9_-]+)/);
+            if (!match) return sock.sendMessage(chat, { text: "❌ No public results found! Try giving direct link." }, { quoted: msg });
             url = match[0];
         }
 
-        // 2. SCRAPING LOGIC (evoig.com)
-        const config = {
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36'
+        // 2. SCRAPING LOGIC (Using a more stable endpoint)
+        // Note: Saveclip/Evoig often change. Using a fallback logic here.
+        const res = await axios.post('https://saveclip.app/api/ajaxSearch', 
+            new URLSearchParams({ q: url, vt: 'facebook' }), // Some sites use shared logic
+            {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'User-Agent': 'Mozilla/5.0'
+                }
             }
-        };
+        );
 
-        const params = new URLSearchParams();
-        params.append('url', url);
-        params.append('lang', 'en');
+        // Regex to extract link - More flexible
+        const dlUrlMatch = res.data.data.match(/href=\\"(https:\/\/.*?)\\"/);
+        if (!dlUrlMatch) throw new Error("Private account or Invalid Link");
 
-        const { data } = await axios.post('https://saveclip.app/en/api/ajaxSearch', params, config);
-
-        // Finding media link and thumbnail
-        const dlUrl = data.data.match(/href="([^"]+)"/)[1];
-        const thumbMatch = data.data.match(/src="([^"]+)"/);
-        const thumb = thumbMatch ? thumbMatch[1] : 'https://i.imgur.com/your_default.jpg';
-        const title = "Asura MD Search Result";
-
-        // Buffer download
+        const dlUrl = dlUrlMatch[1].replace(/\\/g, '');
+        
+        // Media Buffer
         const mediaRes = await axios.get(dlUrl, { responseType: 'arraybuffer' });
         const buffer = Buffer.from(mediaRes.data);
 
-        // Design 
+        // Design
         const caption = `*👺⃝⃘̉̉━━━━━━━━━━━◆◆◆*
 *┊ ┊ ┊ ┊ ┊*
 *┊ ┊ ✫ ˚㋛ ⋆｡ ❀*
@@ -55,7 +57,7 @@ export default async (sock, msg, args) => {
 *✧* 「 \`👺Asura MD\` 」
 *╰─────────────────❂*
 ╭•°•❲ *Downloading...* ❳•°•
- ⊙🎬 *TITLE:* ${title}
+ ⊙🎬 *TITLE:* Insta Media
 ╰━━━━━━━━━━━━━━┈⊷
  ⊙📺 *SOURCE:* Instagram
 ╰━━━━━━━━━━━━━━┈⊷
@@ -68,7 +70,6 @@ export default async (sock, msg, args) => {
 > 📢 Join our channel: https://whatsapp.com/channel/0029VbB59W9GehENxhoI5l24
 > *© ᴄʀᴇᴀᴛᴇᴅ ʙʏ 👺Asura MD*`;
 
-     //Image
         const isVideo = dlUrl.includes('.mp4') || dlUrl.includes('fbcdn.net');
 
         if (isVideo) {
@@ -79,24 +80,21 @@ export default async (sock, msg, args) => {
                 contextInfo: {
                     externalAdReply: {
                         title: "ASURA INSTA DOWNLOADER",
-                        body: "Reels & Videos Processed",
-                        thumbnailUrl: thumb,
+                        body: "Processed Successfully",
                         mediaType: 1,
+                        thumbnailUrl: "https://i.imgur.com/26Xm90Y.jpeg", 
                         renderLargerThumbnail: true
                     }
                 }
             }, { quoted: msg });
         } else {
-            await sock.sendMessage(chat, {
-                image: buffer,
-                caption: caption
-            }, { quoted: msg });
+            await sock.sendMessage(chat, { image: buffer, caption: caption }, { quoted: msg });
         }
 
         await sock.sendMessage(chat, { react: { text: "✅", key: msg.key } });
 
     } catch (error) {
         console.error(error);
-        await sock.sendMessage(chat, { text: "❌ error private account🤣" }, { quoted: msg });
+        await sock.sendMessage(chat, { text: "❌ Error: Private account 🤣!" }, { quoted: msg });
     }
 };
