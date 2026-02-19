@@ -4,7 +4,7 @@ export default async (sock, msg, args) => {
     const chat = msg.key.remoteJid;
     const text = args.join(' ');
 
-    if (!text) return sock.sendMessage(chat, { text: "❌Example: .tiktok name/link." }, { quoted: msg });
+    if (!text) return sock.sendMessage(chat, { text: "❌Example: .Flix fun videos." }, { quoted: msg });
 
     try {
         await sock.sendMessage(chat, { react: { text: "⏳", key: msg.key } });
@@ -34,7 +34,7 @@ export default async (sock, msg, args) => {
 *┊ ┊ ┊ ┊ ┊*
 *┊ ┊ ✫ ˚㋛ ⋆｡ ❀*
 *┊ ☪︎⋆*
-*⊹* 🪔 *TikTok Download*
+*⊹* 🪔 *ASURA FLIX*
 *✧* 「 \`👺Asura MD\` 」
 *╰─────────────────❂*
 ╭•°•❲ *Downloading...* ❳•°•
