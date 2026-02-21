@@ -5,13 +5,14 @@ export default async (sock, msg, args) => {
     const imagePath = './media/thumb.jpg'; 
     const songPath = './media/song.opus'; 
 
-    const aliveMsg = `*👺⃝⃘̉̉̉━━━━━━━━━◆◆◆◆◆*
+    const aliveMsg = `
+*👺⃝⃘̉̉̉━━━━━━━━━◆◆◆◆◆*
 *┊ ┊ ┊ ┊ ┊*
 *┊ ┊ ✫ ˚㋛ ⋆｡ ❀*
 *┊ ☪︎⋆*
 *⊹* 🪔 *ᴡʜᴀᴛꜱᴀᴘᴘ ᴍɪɴɪ ʙᴏᴛ*
 *✧* 「 \`👺Asura MD\` 」
-*╰─────────────────❂*
+*╰───────────────❂*
 *Hello! I'm Asura MD, your fastest Assistant - alive and sparkling now! ✨*
 
 ╔━━━━━━━━━━━━━❥❥❥
