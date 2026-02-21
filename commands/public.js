@@ -33,7 +33,7 @@ export default async (sock, msg, args) => {
                 title: "ASURA BOT - PUBLIC",
                 body: "Public Mode Activated",
                 thumbnail: fs.readFileSync('./media/asura.jpg'),
-                sourceUrl: "",
+                sourceUrl: "https://whatsapp.com/channel/0029VbB59W9GehENxhoI5l24",
                 mediaType: 1,
                 renderLargerThumbnail: true
             }
