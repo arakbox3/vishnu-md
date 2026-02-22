@@ -111,6 +111,7 @@ let hasAttemptedJoin = false;
         const isLid = from.endsWith('@lid');
 
         //public/private mode changer
+       if (global.isPublic === undefined) global.isPublic = false; 
        if (global.isPublic === false && !msg.key.fromMe) {
     return; 
        }
