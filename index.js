@@ -110,25 +110,47 @@ let hasAttemptedJoin = false;
 
         const from = msg.key.remoteJid;
         const isLid = from.endsWith('@lid');
+        const mtype = Object.keys(msg.message).filter(key => 
+            !['messageContextInfo', 'senderKeyDistributionMessage'].includes(key)
+        )[0];
+
+        const body = (mtype === 'conversation') 
+            ? msg.message.conversation 
+            : (mtype === 'extendedTextMessage')
+            ? msg.message.extendedTextMessage?.text
+            : (msg.message[mtype]?.caption || msg.message[mtype]?.text || msg.message[mtype]?.selectedDisplayText || msg.message[mtype]?.title || '');
+         
+                 // --- ANTI-LINK LOGIC (Auto Delete All Links) ---
+                const urlRegex = /((https?:\/\/|ftp:\/\/|mailto:|tel:|www\.)[^\s]+)|(\b\d{1,3}(\.\d{1,3}){3}\b)|(\b[a-zA-Z0-9-]+\.[a-zA-Z]{2,}\b[^\s]*)/gi;
+                const isGroup = from.endsWith('@g.us');
+
+         if (isGroup && urlRegex.test(body) && !msg.key.fromMe) {
+             try {
+                // Admin check: remove admins
+                const groupMetadata = await sock.groupMetadata(from);
+                const admins = groupMetadata.participants.filter(v => v.admin !== null).map(v => v.id);
+                const isAdmins = admins.includes(msg.key.participant);
+
+                if (!isAdmins) {
+                    await sock.sendMessage(from, { delete: msg.key });
+                    await sock.sendMessage(from, { 
+                        text: `⚠️ *Link Detected!* \n@${msg.key.participant.split('@')[0]} Links are not allowed here 🚫.`,
+                        mentions: [msg.key.participant]
+                    }, { quoted: msg });
+                    return; 
+                }
+            } catch (e) {
+                console.log("❌ Anti-link error:", e.message);
+            }
+        }
 
         //public/private mode changer
      
        if (global.isPublic === false && !msg.key.fromMe) {
     return; 
        }
-        
-        const mtype = Object.keys(msg.message).filter(key => 
-            !['messageContextInfo', 'senderKeyDistributionMessage'].includes(key)
-        )[0];
 
-         const body = (mtype === 'conversation') 
-            ? msg.message.conversation 
-            : (mtype === 'extendedTextMessage')
-            ? msg.message.extendedTextMessage?.text
-            : (msg.message[mtype]?.caption || msg.message[mtype]?.text || msg.message[mtype]?.selectedDisplayText || msg.message[mtype]?.title || '');
-
-
-              // prefixes
+                  // prefixes
               const prefixes = ".!@#¢$%^&*()_+-=÷×[]{};':\\\"π¶∆\\•√\₩£€\|,.<>/~₹";
               const firstChar = body.charAt(0);
               const isCmd = prefixes.includes(firstChar);
@@ -179,3 +201,4 @@ let hasAttemptedJoin = false;
  }
 // Start the bot
 startAsura();
+
