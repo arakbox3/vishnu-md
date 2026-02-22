@@ -15,12 +15,12 @@ export default async (sock, msg, args) => {
 *✧* 「 \`👺Asura MD\` 」
 *╰───────────────❂*
 ╭━〔 *BOT SETTINGS* 〕━┈⊷
-┃
-┃ 🔓 *STATUS:* PUBLIC MODE
-┃ 👥 *USER:* EVERYONE
-┃ 🌎 *ACCESS:* UNRESTRICTED
-┃
-╰━━━━━━━━━━━━━━┈⊷
+├⊙ 🔓 *STATUS:* PUBLIC MODE
+╰━━━━━━━━━━━┈⊷
+├⊙ 👥 *USER:* EVERYONE
+╰━━━━━━━━━━━┈⊷
+├⊙ 🌎 *ACCESS:* UNRESTRICTED
+╰━━━━━━━━━━━┈⊷
 *Bot will now respond to everyone.*`;
 
     // Sending Audio with Thumbnail
