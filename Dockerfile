@@ -10,7 +10,7 @@ WORKDIR /root/asura-md
 
 #copy packages 
 COPY package.json .
-RUN npm install --network-timeout 100000
+RUN npm install --network-timeout=100000
 
 # copy 
 COPY . .
