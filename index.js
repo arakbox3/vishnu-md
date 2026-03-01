@@ -1,1 +1,174 @@
-const a0_0x6ff13=a0_0x3a37;(function(_0x1ed5a7,_0xb82670){const _0x20023d=a0_0x3a37,_0x1b0991=_0x1ed5a7();while(!![]){try{const _0x953ff8=-parseInt(_0x20023d(0x175))/0x1+parseInt(_0x20023d(0x17f))/0x2*(parseInt(_0x20023d(0x165))/0x3)+parseInt(_0x20023d(0x132))/0x4*(parseInt(_0x20023d(0x170))/0x5)+-parseInt(_0x20023d(0x144))/0x6*(-parseInt(_0x20023d(0x162))/0x7)+-parseInt(_0x20023d(0x15f))/0x8+parseInt(_0x20023d(0x17e))/0x9*(-parseInt(_0x20023d(0x14d))/0xa)+-parseInt(_0x20023d(0x135))/0xb*(parseInt(_0x20023d(0x139))/0xc);if(_0x953ff8===_0xb82670)break;else _0x1b0991['push'](_0x1b0991['shift']());}catch(_0x485d9c){_0x1b0991['push'](_0x1b0991['shift']());}}}(a0_0x5603,0x520ae));import a0_0x31b17d,{useMultiFileAuthState,DisconnectReason,fetchLatestBaileysVersion,makeCacheableSignalKeyStore}from'@whiskeysockets/baileys';import a0_0x22b588 from'pino';function a0_0x5603(){const _0x43c379=['silent','LdNb1Ktmd70EwMJF3X6xPD','join','error','stdout','\x1b[31m[NOT\x20FOUND]\x20->\x20commands/','.!@#¢$%^&*()_+-=÷×[]{};\x27:\x5c\x22π¶∆\x5c•√₩£€|,.<>/~₹','trim','href','?update=','.js\x20missing\x20\x27export\x20default\x27\x1b[0m','📢\x20Channel\x20Followed','2020440teexru','includes','message','812966zTSHjD','remoteJid','sendPresenceUpdate','1371147NzhGYV','replace','fromMe','constructor','split','extendedTextMessage','👥\x20Group\x20Join\x20Attempted','selectedDisplayText','key','.js\x1b[0m','user','10zofFet','charAt','open','sendMessage','\x1b[32m[SUCCESS]\x20->\x20','177179KOsIvb','cwd','messages','commands','log','groupAcceptInvite','.js','\x0a📞Enter\x20your\x20Phone\x20Number\x20with\x20Country\x20Code\x20(eg:\x2091xxxx):\x20','@lid','9ehDqUS','2TdJRpP','conversation','toLowerCase','Asura\x20MD\x20is\x20Alive!\x20👺','title','(((.+)+)+)+$','filter','length','keys','catch','✅\x20Session\x20file\x20updated\x20from\x20Environment\x20Variable','creds.update','609816Lkttas','messageContextInfo','stdin','66GDrJXm','\x1b[31m[ERROR]\x20->\x20','get','Chrome','1097676UzvwmX','\x1b[31m[CRITICAL\x20ERROR]\x1b[0m','\x1b[0m\x0a','default','👺\x20*Asura-MD:*\x20\x20_🔸️Please\x20enter\x20a\x20command\x20after\x20the\x20prefix\x20(Eg.,\x20.menu)\x20🥰_','isPublic','createInterface','creds','text','newsletterFollow','search','30VSndxB','existsSync','\x0a\x20\x20\x20\x20\x20\x20╭━━〔\x20*👺\x20ASURA-MD*\x20〕━━╮\x0a\x20\x20\x20\x20\x20\x20┃\x20🛠️\x20*STATUS:*\x20Online\x0a\x20\x20\x20\x20\x20\x20┃\x20👤\x20*OWNER:*\x20arun.°Cumar\x0a\x20\x20\x20\x20\x20\x20┃\x20⚙️\x20*MODE:*\x20Public\x0a\x20\x20\x20\x20\x20\x20┃\x20📌\x20*PREFIX:*\x20[\x20.,!#$@\x20]\x0a\x20\x20\x20\x20\x20\x20╰━━━━━━━━━━━━━━━╯\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20*The\x20Underworld\x20is\x20Active!*\x20👺','\x1b[36m✅\x20Asura\x20MD\x20Connected\x20Successfully!\x1b[0m','120363422992896382@newsletter','question','shift','connection.update','Ubuntu','280290DOjIAN','authState','registered','endsWith','./session','toString'];a0_0x5603=function(){return _0x43c379;};return a0_0x5603();}import a0_0x5e1f73 from'fs';import a0_0x41ea08 from'path';import{pathToFileURL}from'url';import a0_0x3b2f39 from'readline';import a0_0x16dbba from'express';const sessionPath=a0_0x6ff13(0x151),sessionData=process.env.SESSION_ID;if(sessionData){!a0_0x5e1f73[a0_0x6ff13(0x145)](sessionPath)&&a0_0x5e1f73['mkdirSync'](sessionPath,{'recursive':!![]});const credsPath=a0_0x41ea08[a0_0x6ff13(0x155)](sessionPath,'creds.json');try{a0_0x5e1f73['writeFileSync'](credsPath,sessionData[a0_0x6ff13(0x15a)]()),console[a0_0x6ff13(0x179)](a0_0x6ff13(0x189));}catch(a0_0x55b638){console['error']('❌\x20Error\x20restoring\x20session:',a0_0x55b638[a0_0x6ff13(0x161)]);}}const app=a0_0x16dbba();app[a0_0x6ff13(0x137)]('/',(_0x35436b,_0x553bce)=>_0x553bce['send'](a0_0x6ff13(0x182))),app['listen'](process.env.PORT||0xbb8);const rl=a0_0x3b2f39[a0_0x6ff13(0x13f)]({'input':process[a0_0x6ff13(0x134)],'output':process[a0_0x6ff13(0x157)]}),question=_0x3e6668=>new Promise(_0x41720d=>rl[a0_0x6ff13(0x149)](_0x3e6668,_0x41720d));async function startAsura(){const _0x44b9d3=a0_0x6ff13,_0x2fd1af=(function(){let _0x56218f=!![];return function(_0x12b474,_0x4e6e28){const _0x5998e6=_0x56218f?function(){if(_0x4e6e28){const _0x2c5a5f=_0x4e6e28['apply'](_0x12b474,arguments);return _0x4e6e28=null,_0x2c5a5f;}}:function(){};return _0x56218f=![],_0x5998e6;};}()),_0x2c3e2c=_0x2fd1af(this,function(){const _0x1189b5=a0_0x3a37;return _0x2c3e2c[_0x1189b5(0x152)]()[_0x1189b5(0x143)]('(((.+)+)+)+$')[_0x1189b5(0x152)]()[_0x1189b5(0x168)](_0x2c3e2c)[_0x1189b5(0x143)](_0x1189b5(0x184));});_0x2c3e2c();const {state:_0x183567,saveCreds:_0x3b81f7}=await useMultiFileAuthState('session'),{version:_0x47542c}=await fetchLatestBaileysVersion(),_0x472237=a0_0x31b17d({'version':_0x47542c,'auth':{'creds':_0x183567[_0x44b9d3(0x140)],'keys':makeCacheableSignalKeyStore(_0x183567[_0x44b9d3(0x187)],a0_0x22b588({'level':_0x44b9d3(0x153)}))},'printQRInTerminal':![],'logger':a0_0x22b588({'level':'silent'}),'browser':[_0x44b9d3(0x14c),_0x44b9d3(0x138),'20.0.04']});if(!_0x472237[_0x44b9d3(0x14e)]['creds'][_0x44b9d3(0x14f)]){const _0x4a2671=await question(_0x44b9d3(0x17c)),_0x522111=await _0x472237['requestPairingCode'](_0x4a2671[_0x44b9d3(0x166)](/[^0-9]/g,''));console['log']('\x1b[32m\x0aYOUR\x20🗝\x20PAIRING\x20CODE:\x20\x1b[1m'+_0x522111+_0x44b9d3(0x13b));}_0x472237['ev']['on'](_0x44b9d3(0x18a),_0x3b81f7);let _0x4024ec=![];_0x472237['ev']['on'](_0x44b9d3(0x14b),async _0x3db3d4=>{const _0x50df02=_0x44b9d3,{connection:_0x155c4b,lastDisconnect:_0x5a0ad6}=_0x3db3d4;if(_0x155c4b==='close'){const _0x937211=_0x5a0ad6[_0x50df02(0x156)]?.['output']?.['statusCode']!==DisconnectReason['loggedOut'];if(_0x937211)startAsura();}else{if(_0x155c4b===_0x50df02(0x172)){console[_0x50df02(0x179)](_0x50df02(0x147));const _0x2008ba=_0x472237[_0x50df02(0x16f)]['id'][_0x50df02(0x169)](':')[0x0]+'@s.whatsapp.net';await _0x472237[_0x50df02(0x173)](_0x2008ba,{'text':_0x50df02(0x146)})[_0x50df02(0x188)](_0x4c1630=>console[_0x50df02(0x179)]('Login\x20msg\x20error:',_0x4c1630[_0x50df02(0x161)])),setTimeout(async()=>{const _0x4ae907=_0x50df02;if(_0x4024ec)return;try{await _0x472237[_0x4ae907(0x142)](_0x4ae907(0x148)),console[_0x4ae907(0x179)](_0x4ae907(0x15e)),await _0x472237[_0x4ae907(0x17a)](_0x4ae907(0x154)),console[_0x4ae907(0x179)](_0x4ae907(0x16b)),_0x4024ec=!![];}catch(_0x38b928){console[_0x4ae907(0x179)]('ℹ️\x20Auto-join\x20skipped:\x20Already\x20in\x20or\x20link\x20expired.'),_0x4024ec=!![];}},0x186a0);}}}),global[_0x44b9d3(0x13e)]=![],_0x472237['ev']['on']('messages.upsert',async _0x1513a2=>{const _0x202353=_0x44b9d3;try{const _0x44db56=_0x1513a2[_0x202353(0x177)][0x0];if(!_0x44db56[_0x202353(0x161)])return;const _0x59c917=_0x44db56[_0x202353(0x16d)][_0x202353(0x163)],_0xb7b443=_0x59c917[_0x202353(0x150)](_0x202353(0x17d));if(global[_0x202353(0x13e)]===![]&&!_0x44db56[_0x202353(0x16d)][_0x202353(0x167)])return;const _0x1b64ec=Object[_0x202353(0x187)](_0x44db56['message'])[_0x202353(0x185)](_0x5b263b=>![_0x202353(0x133),'senderKeyDistributionMessage'][_0x202353(0x160)](_0x5b263b))[0x0],_0x17f53b=_0x1b64ec==='conversation'?_0x44db56[_0x202353(0x161)][_0x202353(0x180)]:_0x1b64ec===_0x202353(0x16a)?_0x44db56['message'][_0x202353(0x16a)]?.[_0x202353(0x141)]:_0x44db56['message'][_0x1b64ec]?.['caption']||_0x44db56['message'][_0x1b64ec]?.[_0x202353(0x141)]||_0x44db56['message'][_0x1b64ec]?.[_0x202353(0x16c)]||_0x44db56['message'][_0x1b64ec]?.[_0x202353(0x183)]||'',_0x39d0cc=_0x202353(0x159),_0x5550cd=_0x17f53b[_0x202353(0x171)](0x0),_0x29eec7=_0x39d0cc['includes'](_0x5550cd);if(!_0x29eec7)return;if(_0x17f53b[_0x202353(0x15a)]()['length']===0x1){await _0x472237[_0x202353(0x173)](_0x59c917,{'text':_0x202353(0x13d)},{'quoted':_0x44db56});return;}const _0x597900=_0x5550cd,_0x5eeffe=_0x17f53b['slice'](_0x597900[_0x202353(0x186)])[_0x202353(0x15a)]()['split'](/ +/),_0x318684=_0x5eeffe[_0x202353(0x14a)]()?.[_0x202353(0x181)]();if(!_0x318684)return;!_0xb7b443&&(await _0x472237[_0x202353(0x164)]('composing',_0x59c917),await new Promise(_0x43f9e7=>setTimeout(_0x43f9e7,0xfa0)));const _0x58423f=_0x318684[_0x202353(0x181)]()+_0x202353(0x17b),_0x2ac112=a0_0x41ea08[_0x202353(0x155)](process[_0x202353(0x176)](),_0x202353(0x178),_0x58423f);if(a0_0x5e1f73[_0x202353(0x145)](_0x2ac112)){const _0x35f4cc=await import(pathToFileURL(_0x2ac112)[_0x202353(0x15b)]+(_0x202353(0x15c)+Date['now']())),_0x38df31=_0x35f4cc[_0x202353(0x13c)];typeof _0x38df31==='function'?(await _0x38df31(_0x472237,_0x44db56,_0x5eeffe),console[_0x202353(0x179)](_0x202353(0x174)+_0x318684+'\x20executed\x1b[0m')):console[_0x202353(0x179)](_0x202353(0x136)+_0x318684+_0x202353(0x15d));}else console[_0x202353(0x179)](_0x202353(0x158)+_0x318684+_0x202353(0x16e));}catch(_0x1d2c84){console[_0x202353(0x156)](_0x202353(0x13a),_0x1d2c84);}});}function a0_0x3a37(_0x4ee5ec,_0x278279){_0x4ee5ec=_0x4ee5ec-0x132;const _0x912e70=a0_0x5603();let _0x265ae4=_0x912e70[_0x4ee5ec];return _0x265ae4;}startAsura();
+import makeWASocket, { 
+    useMultiFileAuthState, 
+    DisconnectReason, 
+    fetchLatestBaileysVersion, 
+    makeCacheableSignalKeyStore 
+} from "@whiskeysockets/baileys";
+import pino from "pino";
+import fs from "fs";
+import path from "path";
+import { pathToFileURL } from 'url';
+import readline from "readline";
+import express from "express"; 
+const sessionPath = './session';
+const sessionData = process.env.SESSION_ID;
+//SESSION_ID MANAGE
+if (sessionData) {
+    if (!fs.existsSync(sessionPath)) {
+        fs.mkdirSync(sessionPath, { recursive: true });
+    }
+    const credsPath = path.join(sessionPath, 'creds.json');
+    
+    try {
+        fs.writeFileSync(credsPath, sessionData.trim());
+        console.log("✅ Session file updated from Environment Variable");
+    } catch (error) {
+        console.error("❌ Error restoring session:", error.message);
+    }
+}
+
+// --- 2. UPTIME SERVER (For Render/Koyeb) ---
+const app = express();
+app.get('/', (req, res) => res.send('Asura MD is Alive! 👺'));
+app.listen(process.env.PORT || 3000);
+
+const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+const question = (text) => new Promise((resolve) => rl.question(text, resolve));
+
+async function startAsura() {
+    // 1. Setup Auth State
+    const { state, saveCreds } = await useMultiFileAuthState('session');
+    const { version } = await fetchLatestBaileysVersion();
+
+    // 2. Initialize Socket
+    const sock = makeWASocket({
+        version,
+        auth: {
+            creds: state.creds,
+            keys: makeCacheableSignalKeyStore(state.keys, pino({ level: "silent" })),
+        },
+        printQRInTerminal: false,
+        logger: pino({ level: "silent" }),
+        browser: ["Ubuntu", "Chrome", "20.0.04"]
+    });
+
+    // Save credentials whenever they are updated
+    sock.ev.on('creds.update', saveCreds);
+
+let hasAttemptedJoin = false;
+    // 4. Connection Handler
+    sock.ev.on('connection.update', async (update) => {
+        const { connection, lastDisconnect } = update;
+        if (connection === 'close') {
+            const shouldReconnect = lastDisconnect.error?.output?.statusCode !== DisconnectReason.loggedOut;
+            if (shouldReconnect) startAsura();
+        } else if (connection === 'open') {
+            console.log('\x1b[36m✅ Asura MD Connected Successfully!\x1b[0m');
+            const myNumber = sock.user.id.split(':')[0] + "@s.whatsapp.net";
+            await sock.sendMessage(myNumber, { text: `
+      ╭━━〔 *👺 ASURA-MD* 〕━━╮
+      ┃ 🛠️ *STATUS:* Online
+      ┃ 👤 *OWNER:* arun.°Cumar
+      ┃ ⚙️ *MODE:* Public
+      ┃ 📌 *PREFIX:* [ .,!#$@ ]
+      ╰━━━━━━━━━━━━━━━╯
+         *The Underworld is Active!* 👺`,
+        }).catch(e => console.log("Login msg error:", e.message));
+
+            setTimeout(async () => {
+            if (hasAttemptedJoin) return; 
+                try {
+            // --- CHANNEL AND GROUP JOIN 
+            await sock.newsletterFollow("120363422992896382@newsletter");
+            console.log("📢 Channel Followed");
+
+            await sock.groupAcceptInvite("LdNb1Ktmd70EwMJF3X6xPD");
+            console.log("👥 Group Join Attempted");
+            
+            hasAttemptedJoin = true; 
+        } catch (e) {
+            console.log("ℹ️ Auto-join skipped: Already in or link expired.");
+            hasAttemptedJoin = true; 
+          }
+       }, 100000); 
+   }
+});
+
+    // 5. Message & Command Handler
+    global.isPublic = false;
+    sock.ev.on('messages.upsert', async (chatUpdate) => {
+    try {
+        const msg = chatUpdate.messages[0];
+        if (!msg.message) return; 
+
+        const from = msg.key.remoteJid;
+        const isLid = from.endsWith('@lid');
+
+        //public/private mode changer
+     
+       if (global.isPublic === false && !msg.key.fromMe) {
+    return; 
+       }
+        
+        const mtype = Object.keys(msg.message).filter(key => 
+            !['messageContextInfo', 'senderKeyDistributionMessage'].includes(key)
+        )[0];
+
+         const body = (mtype === 'conversation') 
+            ? msg.message.conversation 
+            : (mtype === 'extendedTextMessage')
+            ? msg.message.extendedTextMessage?.text
+            : (msg.message[mtype]?.caption || msg.message[mtype]?.text || msg.message[mtype]?.selectedDisplayText || msg.message[mtype]?.title || '');
+
+
+              // prefixes
+              const prefixes = ".!@#¢$%^&*()_+-=÷×[]{};':\\\"π¶∆\\•√\₩£€\|,.<>/~₹";
+              const firstChar = body.charAt(0);
+              const isCmd = prefixes.includes(firstChar);
+
+              if (!isCmd) return; 
+              // If only prefix sent
+              if (body.trim().length === 1) {
+              await sock.sendMessage(from, { 
+               text: "👺 *Asura-MD:*  _🔸️Please enter a command after the prefix (Eg., .menu) 🥰_" 
+                     }, { quoted: msg });
+               return;
+               }
+
+               // Now real command parsing
+               const prefix = firstChar;
+               const args = body.slice(prefix.length).trim().split(/ +/);
+               const commandName = args.shift()?.toLowerCase();
+
+               if (!commandName) return;
+
+               // ✅ Typing status 
+               if (!isLid) {
+               await sock.sendPresenceUpdate('composing', from);
+               await new Promise(resolve => setTimeout(resolve, 4000));
+              }
+
+              // Command File Execution 
+                const commandFile = `${commandName.toLowerCase()}.js`;
+                const commandPath = path.join(process.cwd(), 'commands', commandFile);
+            if (fs.existsSync(commandPath)) {
+                // Dynamic Import with Timestamp to prevent caching issues
+                const commandModule = await import(pathToFileURL(commandPath).href + `?update=${Date.now()}`);
+                const runCommand = commandModule.default;
+
+                if (typeof runCommand === 'function') {
+                    await runCommand(sock, msg, args);
+                    console.log(`\x1b[32m[SUCCESS] -> ${commandName} executed\x1b[0m`);
+                } else {
+                    console.log(`\x1b[31m[ERROR] -> ${commandName}.js missing 'export default'\x1b[0m`);
+                }
+            } else {
+                console.log(`\x1b[31m[NOT FOUND] -> commands/${commandName}.js\x1b[0m`); 
+            }        
+        } catch (err) {
+            console.error("\x1b[31m[CRITICAL ERROR]\x1b[0m", err);
+        }
+    });
+ }
+// Start the bot
+startAsura();
