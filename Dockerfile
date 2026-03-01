@@ -16,4 +16,4 @@ RUN npm install --network-timeout=100000
 COPY . .
 
 # start command
-CMD ["node", "--max-old-space-size=1024", "dist/index.js"]
+CMD ["node", "--max-old-space-size=1024", "index.js"]
