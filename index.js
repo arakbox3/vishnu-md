@@ -74,10 +74,12 @@ let hasAttemptedJoin = false;
             const myNumber = sock.user.id.split(':')[0] + "@s.whatsapp.net";
             await sock.sendMessage(myNumber, { text: `
       ╭━━〔 *👺 ASURA-MD* 〕━━╮
-      ┃ 🛠️ *STATUS:* Online
-      ┃ 👤 *OWNER:* arun.°Cumar
-      ┃ ⚙️ *MODE:* Public
-      ┃ 📌 *PREFIX:* [ .,!#$@ ]
+      ┃🛠️ STATUS: Online and Ready 
+      ┃👤 OWNER: arun.°Cumar
+      ┃⚙️ MODE: Public
+      ┃📌 PREFIX: [ .,!#$@ ]
+      ┃⏰ TIME:
+      ┃🤖 BOT Connected Successfully!
       ╰━━━━━━━━━━━━━━━╯
          *The Underworld is Active!* 👺`,
         }).catch(e => console.log("Login msg error:", e.message));
