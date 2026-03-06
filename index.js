@@ -154,9 +154,8 @@ if (hasLink && isGroup && !msg.key.fromMe) {
     text: `👋 *@${sender.split('@')[0]}*, please avoid sending links here. Let’s keep the group clean and spam-free. Thanks! 😊`,
     mentions: [sender]
 }, { quoted: msg });
-
+   }
 }
-});
 // --- ANTI-LINK LOGIC END ---
 
         //public/private mode changer
