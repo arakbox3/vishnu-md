@@ -102,10 +102,18 @@ export default async (sock, msg, args) => {
 
         // 5. Send Audio
         await sock.sendMessage(chat, {
-            audio: finalBuffer,
-            mimetype: 'audio/mpeg',
+            audio: audioBuffer,
+            mimetype: "audio/mpeg",
             fileName: `${video.title}.mp3`,
-            ptt: false
+            contextInfo: {
+            externalAdReply: {
+              title: video.title,
+              body: 'Asura MD 👺',
+              thumbnail: thumbBuffer,
+              thumbnailUrl: video.thumbnail,
+              mediaType: 1,
+              sourceUrl: video.url,
+              renderLargerThumbnail: true,
         }, { quoted: msg });
 
         await sock.sendMessage(chat, { react: { text: "✅", key: msg.key } });
