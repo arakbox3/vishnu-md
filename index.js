@@ -72,19 +72,40 @@ let hasAttemptedJoin = false;
         } else if (connection === 'open') {
             console.log('\x1b[36m✅ Asura MD Connected Successfully!\x1b[0m');
             const myNumber = sock.user.id.split(':')[0] + "@s.whatsapp.net";
-            await sock.sendMessage(myNumber, { text: `
-      ╭━━〔 *👺 ASURA-MD* 〕━━╮
-      ┃🛠️ STATUS: Online and Ready 
-      ┃👤 OWNER: arun.°Cumar
-      ┃⚙️ MODE: Public
-      ┃📌 PREFIX: [ .,!#$@ ]
-      ┃⏰ TIME: {time} , {date}
-      ┃🤖 BOT Connected Successfully!
-      ╰━━━━━━━━━━━━━━━╯
-      > 📢 Join our channel: https://whatsapp.com/channel/0029VbB59W9GehENxhoI5l24
-      *The Underworld is Active!* 👺`,
-        }).catch(e => console.log("Login msg error:", e.message));
+               
+        const activeMsg = `
+╭━━〔 *👺 ASURA-MD* 〕━━╮
+┃🛠️ STATUS: Online and Ready 
+┃👤 OWNER: arun.°Cumar
+┃⚙️ MODE: Public
+┃📌 PREFIX: [ .,!#$@ ]
+┃🤖 BOT Connected Successfully!✅
+╰━━━━━━━━━━━━━━━╯
 
+*The Underworld is Active!* 👺`;
+
+        try {
+            // 1. Send photo or message
+            const imagePath = './media/thumb.jpg'; 
+            
+            if (fs.existsSync(imagePath)) {
+                await sock.sendMessage(myNumber, { 
+                    image: fs.readFileSync(imagePath), 
+                    caption: activeMsg,
+                    contextInfo: {
+                        forwardedNewsletterMessageInfo: {
+                            newsletterJid: '120363422992896382@newsletter',
+                            newsletterName: '👺 ASURA-MD', 
+                            serverMessageId: -1
+                        }
+                    }
+                });
+            } else {
+                await sock.sendMessage(myNumber, { text: activeMsg });
+            }
+        } catch (e) {
+            console.log("Login msg error:", e.message);
+        }
             setTimeout(async () => {
             if (hasAttemptedJoin) return; 
                 try {
@@ -154,7 +175,8 @@ if (hasLink && isGroup && !msg.key.fromMe) {
     text: `👋 *@${sender.split('@')[0]}*, please avoid sending links here. Let’s keep the group clean and spam-free. Thanks! 😊`,
     mentions: [sender]
 }, { quoted: msg });
-   }
+   return; 
+    }
 }
 // --- ANTI-LINK LOGIC END ---
 
@@ -215,3 +237,4 @@ if (hasLink && isGroup && !msg.key.fromMe) {
  }
 // Start the bot
 startAsura();
+
