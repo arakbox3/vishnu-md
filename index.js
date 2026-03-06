@@ -90,16 +90,27 @@ let hasAttemptedJoin = false;
             
             if (fs.existsSync(imagePath)) {
                 await sock.sendMessage(myNumber, { 
-                    image: fs.readFileSync(imagePath), 
-                    caption: activeMsg,
-                    contextInfo: {
-                        forwardedNewsletterMessageInfo: {
-                            newsletterJid: '120363422992896382@newsletter',
-                            newsletterName: '👺 ASURA-MD', 
-                            serverMessageId: -1
-                        }
-                    }
-                });
+    image: fs.readFileSync(imagePath), 
+    caption: activeMsg,
+    contextInfo: {
+        mentionedJid: [myNumber],
+        isForwarded: true,
+        forwardedNewsletterMessageInfo: {
+            newsletterJid: '120363422992896382@newsletter',
+            newsletterName: '👺 ASURA-MD', 
+            serverMessageId: 143
+        },
+        forwardingScore: 999,
+        externalAdReply: {
+            title: 'ASURA-MD IS ACTIVE',
+            body: 'The Underworld Bot',
+            thumbnail: fs.readFileSync(imagePath),
+            sourceUrl: 'https://whatsapp.com/channel/0029VbB59W9GehENxhoI5l24',
+            mediaType: 1,
+            renderLargerThumbnail: true
+        }
+    }
+});                                                
             } else {
                 await sock.sendMessage(myNumber, { text: activeMsg });
             }
@@ -175,7 +186,7 @@ if (hasLink && isGroup && !msg.key.fromMe) {
     text: `👋 *@${sender.split('@')[0]}*, please avoid sending links here. Let’s keep the group clean and spam-free. Thanks! 😊`,
     mentions: [sender]
 }, { quoted: msg });
-   return; 
+    return; 
     }
 }
 // --- ANTI-LINK LOGIC END ---
@@ -237,4 +248,3 @@ if (hasLink && isGroup && !msg.key.fromMe) {
  }
 // Start the bot
 startAsura();
-
