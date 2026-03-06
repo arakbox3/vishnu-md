@@ -151,27 +151,32 @@ export default async (sock, msg, args) => {
 > 𝑇𝑦𝑝𝑒 𝑎𝑛𝑦 𝑐𝑜𝑚𝑚𝑎𝑛𝑑 𝑠𝑡𝑎𝑟𝑡𝑖𝑛𝑔 𝑤𝑖𝑡ℎ 𝑎 𝐷𝑜𝑡 ( ! , . / # )
 > 𝐸𝑥𝑎𝑚𝑝𝑙𝑒: .𝑝𝑖𝑛𝑔 𝑜𝑟 ,𝑎𝑙𝑖𝑣𝑒
 
-© 👺 𝐴𝑠𝑢𝑟𝑎 𝑀𝐷 ᴍɪɴɪ ʙᴏᴛ
-𝑠ɪᴍᴘʟᴇ ᴡᴀʙᴏᴛ ᴍᴀᴅᴇ ʙʏ 𝑎𝑟𝑢𝑛.𝑐𝑢𝑚𝑎𝑟 ヅ
-> 📢 Join our channel: https://whatsapp.com/channel/0029VbB59W9GehENxhoI5l24`;
+©️ 👺 𝐴𝑠𝑢𝑟𝑎 𝑀𝐷 ᴍɪɴɪ ʙᴏᴛ
+𝑠ɪᴍᴘʟᴇ ᴡᴀʙᴏᴛ ᴍᴀᴅᴇ ʙʏ 𝑎𝑟𝑢𝑛.𝑐𝑢𝑚𝑎𝑟 ヅ`;
 
         // 3. Send Image with Menu Text
-if (fs.existsSync(imagePath)) {
+   if (fs.existsSync(imagePath)) {
     await sock.sendMessage(chat, {
         document: { url: './media/asura.jpg' },
         mimetype: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         fileName: '👺 ASURA MD', 
         fileLength: 999,
         pageCount: 666,
-        caption: menuText,
         contextInfo: {
-            externalAdReply: {
-                title: 'Asura MD 👺',
-                body: 'A Multi-Device WhatsApp Bot',
-                thumbnail: fs.readFileSync(imagePath),
-                sourceUrl: 'https://whatsapp.com/channel/0029VbB59W9GehENxhoI5l24',
-                mediaType: 1,
-                renderLargerThumbnail: true 
+            isForwarded: true,
+            forwardedNewsletterMessageInfo: {
+            newsletterJid: '120363422992896382@newsletter',
+            newsletterName: '👺 ASURA-MD', 
+            serverMessageId: 143
+               },             
+        forwardingScore: 999,
+                externalAdReply: {
+                    title: "👺 ASURA MD OFFICIAL COMMUNITY",
+                    body: "Join now for bot support! ✨",
+                    thumbnail: fs.readFileSync(imagePath),
+                    sourceUrl: 'https://whatsapp.com/channel/0029VbB59W9GehENxhoI5l24',
+                    mediaType: 1,
+                    renderLargerThumbnail: true 
             }
         }
     }, { quoted: msg });
