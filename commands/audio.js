@@ -69,7 +69,7 @@ export default async (sock, msg, args) => {
 *◀︎ •၊၊||၊||||။‌‌‌‌၊||••*
 ╰╌╌╌╌╌╌╌╌╌╌╌╌࿐
 > 📢 Join our channel: https://whatsapp.com/channel/0029VbB59W9GehENxhoI5l24
-> *© ᴄʀᴇᴀᴛᴇᴅ ʙʏ 👺Asura MD*`;
+> ©️ 👺 𝐴𝑠𝑢𝑟𝑎 𝑀𝐷 ᴍɪɴɪ ʙᴏᴛ 𝑠ɪᴍᴘʟᴇ ᴡᴀʙᴏᴛ ᴍᴀᴅᴇ ʙʏ 𝑎𝑟𝑢𝑛.𝑐𝑢𝑚𝑎𝑟 ヅ`;
 
         // 2. Send Thumbnail
         await sock.sendMessage(chat, { 
@@ -87,25 +87,42 @@ export default async (sock, msg, args) => {
             return new Promise((resolve, reject) => {
                 const inputStream = new PassThrough();
                 inputStream.end(buffer);
+                const outputStream = new PassThrough();
                 const chunks = [];
                 ffmpeg(inputStream)
                     .toFormat('mp3')
                     .audioBitrate('128k')
                     .on('error', reject)
-                    .pipe()
-                    .on('data', chunk => chunks.push(chunk))
-                    .on('end', () => resolve(Buffer.concat(chunks)));
-            });
-        };
-
+                    .pipe(outputStream);
+                  outputStream.on('data', chunk => chunks.push(chunk));
+        outputStream.on('end', () => resolve(Buffer.concat(chunks)));
+    });
+};
         const finalBuffer = await convertAudio(inputBuffer);
 
         // 5. Send Audio
-        await sock.sendMessage(chat, {
-            audio: finalBuffer,
-            mimetype: 'audio/mpeg',
-            fileName: `${video.title}.mp3`,
-            ptt: false
+        try {
+    const response = await axios({
+        method: 'get',
+        url: video.thumbnail,
+        responseType: 'stream'
+    });
+ 
+    await sock.sendMessage(chat, {
+        audio: finalBuffer, 
+        mimetype: 'audio/mpeg',
+        fileName: `${video.title}.mp3`,
+        ptt: true, 
+        contextInfo: {
+            externalAdReply: {
+                title: video.title,
+                body: 'Asura-MD Music Downloader',
+                thumbnailUrl: video.thumbnail, 
+                mediaType: 1,
+                renderLargerThumbnail: true,
+                sourceUrl: 'https://whatsapp.com/channel/0029VbB59W9GehENxhoI5l24'
+              }
+           }  
         }, { quoted: msg });
 
         await sock.sendMessage(chat, { react: { text: "✅", key: msg.key } });
