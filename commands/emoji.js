@@ -1,36 +1,41 @@
-import fs from 'fs';
-
 const handler = async (sock, msg, args) => {
-    const { remoteJid, key } = msg;
+const chat = msg.key.remoteJid
 
-    // 50 ഇമോജികളുടെ ലിസ്റ്റ്
-    const emojis = [
-        "😀", "😃", "😄", "😁", "😆", "😅", "😂", "🤣", "😊", "😇",
-        "🙂", "🙃", "😉", "😌", "😍", "🥰", "😘", "😗", "😙", "😚",
-        "😋", "😛", "😝", "😜", "🤪", "🤨", "🧐", "🤓", "😎", "🤩",
-        "🥳", "😏", "😒", "😞", "😔", "😟", "😕", "🙁", "☹️", "😣",
-        "😖", "😫", "😩", "🥺", "😢", "😭", "😤", "😠", "😡", "🤬",
-        "😈", "👿", "👹", "👺", "☠", "💀", "⚰", "🥀", "👻", "☪️",
-        "☸", "🕉", "✝️", "☦", "🌚", "🌝", "✋", "⏹", "🛑", "🔚"
-    ];
+// large emoji pool
+const emojis = [
+"😀","😃","😄","😁","😆","😅","😂","🤣","😊","😇",
+"🙂","🙃","😉","😌","😍","🥰","😘","😗","😙","😚",
+"😋","😛","😝","😜","🤪","🤨","🧐","🤓","😎","🤩",
+"🥳","😏","😒","😞","😔","😟","😕","🙁","☹️","😣",
+"😖","😫","😩","🥺","😢","😭","😤","😠","😡","🤬",
+"😈","👿","👹","👺","💀","☠️","👻","🤖","🎃","🔥",
+"✨","⚡","💫","🌟","⭐","🌙","🌚","🌝","☀️","🌈"
+];
 
-    // ആദ്യം ഒരു മെസ്സേജ് അയക്കുന്നു
-    let { key: editKey } = await sock.sendMessage(remoteJid, { text: "Starting Emoji Dance... 💃" });
+    try {
+        let { key } = await sock.sendMessage(chat, { text: "💃 *Emoji Dance Starting...* 🕺" });
 
-    // ഓരോ 500ms - 1s ഇടവേളയിൽ മെസ്സേജ് എഡിറ്റ് ചെയ്യുന്നു
-    for (let i = 0; i < emojis.length; i++) {
-        await new Promise(resolve => setTimeout(resolve, 800)); // വേഗത ക്രമീകരിക്കാൻ സമയം മാറ്റാം
-        await sock.sendMessage(remoteJid, { 
-            text: emojis[i], 
-            edit: editKey 
+        let frameSize = 10;
+        // ഒരുപാട് ഫ്രെയിമുകൾ ഒഴിവാക്കാൻ slice ഉപയോഗിച്ച് കുറച്ചു മാത്രം എടുക്കാം (Optional)
+        for (let i = 0; i < emojis.length; i += frameSize) {
+            let frame = emojis.slice(i, i + frameSize).join(" ");
+            
+            await new Promise(r => setTimeout(r, 2500)); 
+
+            await sock.sendMessage(chat, {
+                text: frame,
+                edit: key
+            });
+        }
+
+        await sock.sendMessage(chat, {
+            text: "✅ *Emoji Dance Finished*\n👺 ASURA-MD",
+            edit: key
         });
-    }
 
-    // അവസാനം ഒരു ഫിനിഷിംഗ് മെസ്സേജ്
-    await sock.sendMessage(remoteJid, { 
-        text: "Dance Finished! 👺 ASURA-MD", 
-        edit: editKey 
-    });
+    } catch (e) {
+        console.log("Emoji Dance Error:", e);
+    }
 };
 
 export default handler;
