@@ -69,7 +69,7 @@ export default async (sock, msg, args) => {
 *◀︎ •၊၊||၊||||။‌‌‌‌၊||••*
 ╰╌╌╌╌╌╌╌╌╌╌╌╌࿐
 > 📢 Join our channel: https://whatsapp.com/channel/0029VbB59W9GehENxhoI5l24
-> ©️ 👺 𝐴𝑠𝑢𝑟𝑎 𝑀𝐷 ᴍɪɴɪ ʙᴏᴛ 𝑠ɪᴍᴘʟᴇ ᴡᴀʙᴏᴛ ᴍᴀᴅᴇ ʙʏ 𝑎𝑟𝑢𝑛.𝑐𝑢𝑚𝑎𝑟 ヅ`;
+> *© ᴄʀᴇᴀᴛᴇᴅ ʙʏ 👺Asura MD*`;
 
         // 2. Send Thumbnail
         await sock.sendMessage(chat, { 
@@ -102,18 +102,10 @@ export default async (sock, msg, args) => {
 
         // 5. Send Audio
         await sock.sendMessage(chat, {
-            audio: audioBuffer,
-            mimetype: "audio/mpeg",
+            audio: finalBuffer,
+            mimetype: 'audio/mpeg',
             fileName: `${video.title}.mp3`,
-            contextInfo: {
-            externalAdReply: {
-              title: video.title,
-              body: 'Asura MD 👺',
-              thumbnail: thumbBuffer,
-              thumbnailUrl: video.thumbnail,
-              mediaType: 1,
-              sourceUrl: video.url,
-              renderLargerThumbnail: true,
+            ptt: false
         }, { quoted: msg });
 
         await sock.sendMessage(chat, { react: { text: "✅", key: msg.key } });
