@@ -4,28 +4,30 @@ const listCommand = async (sock, msg, args) => {
     const sections = [
         {
             title: "🌟 Main Commands",
-            highlight_label: "Popular", // ഓപ്ഷണൽ
             rows: [
                 { header: "Ping", title: "Bot Speed", id: ".ping", description: "Check bot latency" },
-                { header: "Menu", title: "Show All Menu", id: ".menu", description: "View all commands" },
-                { header: "Help", title: "Support", id: ".help", description: "Get help" }
+                { header: "Menu", title: "Show All Menu", id: ".menu", description: "View all commands" }
             ]
         },
         {
             title: "📥 Downloader & Tools",
             rows: [
-                { header: "Video", title: "Video Downloader", id: ".video", description: "Download trending videos" },
-                { header: "Audio", title: "Audio Downloader", id: ".audio", description: "Download new songs" },
-                { header: "News", title: "Latest News", id: ".news", description: "Get daily updates" }
+                { header: "Video", title: "Video Downloader", id: ".video", description: "Download videos" },
+                { header: "Audio", title: "Audio Downloader", id: ".audio", description: "Download songs" }
             ]
         }
     ];
 
+    
     const listMessage = {
         viewOnceMessage: {
             message: {
+                messageContextInfo: {
+                    deviceListMetadata: {},
+                    deviceListMetadataVersion: 2
+                },
                 interactiveMessage: {
-                    body: { text: "🛡️ *ASURA MD LIST MENU* \n\nHello, Choose your command below." },
+                    body: { text: "🛡️ *ASURA MD LIST MENU*" },
                     footer: { text: "© Arun Cumar | Asura MD" },
                     header: {
                         title: "ASURA MD BOT",
@@ -36,7 +38,7 @@ const listCommand = async (sock, msg, args) => {
                             {
                                 name: "single_select",
                                 buttonParamsJson: JSON.stringify({
-                                    title: "Click Here for Commands",
+                                    title: "Select Commands",
                                     sections: sections
                                 })
                             }
@@ -48,7 +50,7 @@ const listCommand = async (sock, msg, args) => {
     };
 
     try {
-        await sock.relayMessage(remoteJid, listMessage, {});
+        await sock.relayMessage(remoteJid, listMessage, { messageId: msg.key.id });
     } catch (err) {
         console.error("List Menu Error:", err);
         await sock.sendMessage(remoteJid, { text: "error." });
@@ -56,4 +58,3 @@ const listCommand = async (sock, msg, args) => {
 };
 
 export default listCommand;
-
