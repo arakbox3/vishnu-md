@@ -4,43 +4,45 @@ export default async (sock, msg, args) => {
     const from = msg.key.remoteJid;
     const query = args.join(" ");
 
-    // Check if query is provided
-    if (!query) {
-        return sock.sendMessage(from, { text: "❌ Please provide a search query! \nExample: *.xnxx hot*" });
-    }
+    
+    const headers = {
+        'User-Agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
+        'Cookie': 'premium_visit=1' 
+    };
+
+    if (!query) return sock.sendMessage(from, { text: "❌ .xnxx hot!" });
 
     try {
-        // Inform user that search is starting
-        await sock.sendMessage(from, { text: "🔍 Searching for your video, please wait..." }, { quoted: msg });
+        await sock.sendMessage(from, { text: "🔍 Searching..." });
 
-        // Using a public API for searching and downloading
-        // Note: You can replace this URL with any working XNXX API URL
-        const searchRes = await axios.get(`https://api.vreden.my.id/api/xnxxsearch?query=${encodeURIComponent(query)}`);
+        const searchUrl = `https://www.xnxx.com/search/${encodeURIComponent(query)}`;
+        const { data } = await axios.get(searchUrl, { headers });
+
+    
+        const videoIdMatch = data.match(/\/video-([a-z0-9]+)\//);
         
-        if (!searchRes.data.result || searchRes.data.result.length === 0) {
-            return sock.sendMessage(from, { text: "❌ No results found for your query." });
+        if (!videoIdMatch) return sock.sendMessage(from, { text: "❌ error." });
+
+        const videoPageUrl = `https://www.xnxx.com${videoIdMatch[0]}`;
+        const videoPage = await axios.get(videoPageUrl, { headers });
+
+        const highResMatch = videoPage.data.match(/setVideoUrlHigh\('(.*?)'\)/);
+        const lowResMatch = videoPage.data.match(/setVideoUrlLow\('(.*?)'\)/);
+        
+        const finalUrl = highResMatch ? highResMatch[1] : (lowResMatch ? lowResMatch[1] : null);
+
+        if (finalUrl) {
+            await sock.sendMessage(from, { 
+                video: { url: finalUrl }, 
+                caption: "✅ *Asura MD Download*",
+                mimetype: 'video/mp4'
+            }, { quoted: msg });
+        } else {
+            sock.sendMessage(from, { text: "❌ error." });
         }
 
-        const video = searchRes.data.result[0]; // Taking the first result
-        const downloadRes = await axios.get(`https://api.vreden.my.id/api/xnxxdl?url=${video.link}`);
-        
-        const videoUrl = downloadRes.data.result.files.high || downloadRes.data.result.files.low;
-
-        // Send Video Details with Thumbnail
-        await sock.sendMessage(from, { 
-            image: { url: video.thumb }, 
-            caption: `🔥 *TITLE:* ${video.title}\n⏱️ *DURATION:* ${video.duration}\n\n*Uploading video, please wait...*` 
-        }, { quoted: msg });
-
-        // Send the actual video file
-        await sock.sendMessage(from, {
-            video: { url: videoUrl }, 
-            caption: `✅ *Download Complete:* ${video.title}`,
-            mimetype: 'video/mp4'
-        }, { quoted: msg });
-
     } catch (e) {
-        console.error("XNXX Command Error:", e);
-        sock.sendMessage(from, { text: "❌ API Error. The service might be down or blocked." });
+        console.error(e);
+        sock.sendMessage(from, { text: "❌ Error." });
     }
 };
