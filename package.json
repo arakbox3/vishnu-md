@@ -24,7 +24,6 @@
     "@google/generative-ai": "latest",
     "wa-sticker-formatter": "latest",
     "qrcode-terminal": "latest",
-    "yt-search": "latest",
-    "xnxx-render": "latest" 
+    "yt-search": "latest"
   }
 }
