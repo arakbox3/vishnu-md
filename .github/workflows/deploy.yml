@@ -20,7 +20,7 @@ jobs:
           node-version: '24'
 
       - name: Install Dependencies
-        run: npm install
+        run: yarn install
 
       - name: Start Bot
         timeout-minutes: 350 
